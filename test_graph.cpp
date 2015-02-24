@@ -2,6 +2,9 @@
 
 void testGraph(int argc, char* argv[])
 {
+	vector<int> dfs, bfs, ts; //ts: topological sort
+	vector<vector<int> > scc; //strongly connected components
+
 	//graph from CLRS P615 Fig 22.8
 	GraphAL g(14, DIRECTED);
 	g.addEdge(0,4); g.addEdge(0,5); g.addEdge(0,11);
@@ -17,42 +20,73 @@ void testGraph(int argc, char* argv[])
 	g.addEdge(12,9);
 
 	cout << "BFS of graph g: ";
-	vector<int> vbfs = g.BFS(3);
-	for(unsigned k = 0; k < vbfs.size(); ++k) {
-		cout << char(vbfs[k]+'m') << " ";
+	bfs = g.BFS(3);
+	for(unsigned k = 0; k < bfs.size(); ++k) {
+		cout << char(bfs[k]+'m') << " ";
 	}
 	cout << endl;
 
 	cout << "DFS of graph g: ";
-	vector<int> dfs = g.DFS(true);
+	dfs = g.DFS();
 	for(unsigned k = 0; k < dfs.size(); ++k) {
 		cout << char(dfs[k]+'m') << " ";
 	}
 	cout << endl;
-	cout << "DFS of graph g: ";
-	vector<int> dfs2 = g.DFS2();
-	for(unsigned k = 0; k < dfs2.size(); ++k) {
-		cout << char(dfs2[k]+'m') << " ";
-	}
-	cout << endl;
 
-	cout << "Topo sort of graph g: ";
-	vector<int> ts = g.TopoSort();
-	for(vector<int>::const_iterator it = ts.begin(); it != ts.end(); ++it) {
-		cout << char(*it+'m') << " ";
+	cout << "DFS of graph g: ";
+	dfs = g.DFS2();
+	for(unsigned k = 0; k < dfs.size(); ++k) {
+		cout << char(dfs[k]+'m') << " ";
 	}
 	cout << endl;
 	
-	cout << "SCC of graph g: ";
-	vector<vector<int> > scc = g.findSCC();
+	cout << "Topological sort of graph g: ";
+	ts = g.TopoSort();
+	for(unsigned k = 0; k < ts.size(); ++k) {
+		cout << char(ts[k]+'m') << " ";
+	}
+	cout << endl;
+
+	//graph from CLRS P616 Fig 22.9	
+	GraphAL h(8, DIRECTED);
+	h.addEdge(0, 1);
+	h.addEdge(1, 2); h.addEdge(1, 4); h.addEdge(1, 5);
+	h.addEdge(2, 3); h.addEdge(2, 6);
+	h.addEdge(3, 2); h.addEdge(3, 7);
+	h.addEdge(4, 0); h.addEdge(4, 5);
+	h.addEdge(5, 6);
+	h.addEdge(6, 5); h.addEdge(6, 7);
+	h.addEdge(7, 7);
+	
+	cout << "DFS of graph h: ";
+	dfs = h.DFS();
+	for(unsigned k = 0; k < dfs.size(); ++k) {
+		cout << char(dfs[k]+'a') << " ";
+	}
+	cout << endl;
+	cout << "Vertices are " << endl;
+	h.printVertices();
+
+	cout << "DFS of graph h: ";
+	dfs = h.DFS2();
+	for(unsigned k = 0; k < dfs.size(); ++k) {
+		cout << char(dfs[k]+'a') << " ";
+	}
+	cout << endl;
+	cout << "Vertices are " << endl;
+	h.printVertices();
+
+	cout << "SCC of graph h: ";
+	scc = h.findSCC();
 	for(unsigned i = 0; i < scc.size(); ++i) {
 		cout << "(";
 		for(unsigned j = 0; j < scc[i].size(); ++j) {
-			cout << char(scc[i][j]+'m') << " ";
+			cout << char(scc[i][j]+'a') << " ";
 		}
 		cout << ") ";
 	}
 	cout << endl;
+
 	int p = 3, v = 9;
 	cout << " number of paths between " << p << " and " << v << " is " << g.countPaths(p,v) << endl;
 	vector<vector<int> > ret = g.findPaths(p, v);
