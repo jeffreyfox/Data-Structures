@@ -14,11 +14,7 @@ void testGraph(int argc, char* argv[])
 	g.addEdge(9,10);g.addEdge(9,11);
 	g.addEdge(10,13);
 	g.addEdge(12,9);
-//	cout << "graph g : " << endl;
-//	cout << g << endl;
-	GraphAL gT = g.transpose();
-//	cout << "graph gT : " << endl;
-//	cout << gT << endl;
+
 	cout << "BFS of graph g: ";
 	vector<int> vbfs = g.BFS(3);
 	for(unsigned k = 0; k < vbfs.size(); ++k) {
