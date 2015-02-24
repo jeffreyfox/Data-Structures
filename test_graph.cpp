@@ -30,7 +30,7 @@ void testGraph(int argc, char* argv[])
 	}
 	cout << endl;
 	cout << "DFS of graph g: ";
-	vector<int> dfs2 = g.DFS2(true);
+	vector<int> dfs2 = g.DFS2();
 	for(unsigned k = 0; k < dfs2.size(); ++k) {
 		cout << char(dfs2[k]+'m') << " ";
 	}
