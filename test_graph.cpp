@@ -27,12 +27,18 @@ void testGraph(int argc, char* argv[])
 	cout << endl;
 
 	cout << "DFS of graph g: ";
-	vector<int> vdfs = g.DFS();
-	for(unsigned k = 0; k < vdfs.size(); ++k) {
-		cout << char(vdfs[k]+'m') << " ";
+	vector<int> dfs = g.DFS(true);
+	for(unsigned k = 0; k < dfs.size(); ++k) {
+		cout << char(dfs[k]+'m') << " ";
 	}
 	cout << endl;
-	
+	cout << "DFS of graph g: ";
+	vector<int> dfs2 = g.DFS2(true);
+	for(unsigned k = 0; k < dfs2.size(); ++k) {
+		cout << char(dfs2[k]+'m') << " ";
+	}
+	cout << endl;
+
 	cout << "Topo sort of graph g: ";
 	vector<int> ts = g.TopoSort();
 	for(vector<int>::const_iterator it = ts.begin(); it != ts.end(); ++it) {
