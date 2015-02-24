@@ -2,6 +2,7 @@
 
 void testGraph(int argc, char* argv[])
 {
+	//graph from CLRS P615 Fig 22.8
 	GraphAL g(14, DIRECTED);
 	g.addEdge(0,4); g.addEdge(0,5); g.addEdge(0,11);
 	g.addEdge(1,2); g.addEdge(1,4); g.addEdge(1,8);
