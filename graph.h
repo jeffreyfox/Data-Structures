@@ -22,6 +22,11 @@ struct Vertex {
 	Vertex(int i) : index(i), parent(-1), dist(INT_MAX), tag('w'), d(0), f(0), visited(false) {}
 };
 
+ostream& operator<<(ostream& os, const Vertex& v) {
+	os << "(" << v.index << ", (" << v.d << " " << v.f << ")) ";
+	return os;
+}
+
 // element in the adajcency list
 struct AdjElem {
 	int vidx; //index of the destination vertex
@@ -73,6 +78,11 @@ public:
 	/// whether the graph can be colored with 2 colors
 	bool twoColor(int v);
 
+	/// printVertices
+	void printVertices() { 
+		for(int v = 0; v < V; ++v) cout << vs[v] << " ";
+		cout << endl;
+	}
 	/// print path from src to v (using parent attribute)
 	void printPath(int src, int v);
 
@@ -201,22 +211,28 @@ void GraphAL::DFSUtil(int u, int& time, vector<int>& dfs, bool classify_edges)
 
 void GraphAL::DFSUtil2(int u, int& time, vector<int>& dfs) 
 {
-	vs[u].tag = 'g'; vs[u].d = ++time;  //color as grey
 	deque<int> s; //stack
 	s.push_back(u);
 	while(!s.empty()) {
-		u = s.back(); s.pop_back(); //v is always grey
-		dfs.push_back(u);
-		//process u's neighbors in reverse order of adajency list, just to be consistent with recursive version
-		for(list<AdjElem>::const_reverse_iterator it = adj[u].rbegin(); it != adj[u].rend(); ++it) {
-			int v = it->vidx;
-			if(vs[v].tag == 'w') {
-				vs[v].parent = u; vs[v].tag = 'g';  vs[v].d = ++time;
-				s.push_back(v); //push to stack
+		u = s.back(); s.pop_back(); //u is always grey
+		if(vs[u].tag == 'w') { //discovered
+			vs[u].tag = 'g'; vs[u].d = ++time;
+			s.push_back(u); //push back to stack
+			dfs.push_back(u); //push to dfs array
+			//process u's neighbors in reverse order of adajency list, just to be consistent with recursive version
+			for(list<AdjElem>::const_reverse_iterator it = adj[u].rbegin(); it != adj[u].rend(); ++it) {
+				int v = it->vidx;
+				if(vs[v].tag == 'w') {
+					vs[v].parent = u;
+					s.push_back(v); //push to stack
+				}
 			}
+		} else if(vs[u].tag == 'g') { //grey, already found, just stamp finish time
+			vs[u].tag = 'b'; vs[u].f = ++time;
+		} else { //it is possible to have a black node popped
+			//do nothing
 		}
 	}
-	vs[u].tag = 'b'; vs[u].f = ++time;
 }
 
 vector<int> GraphAL::TopoSort() 
