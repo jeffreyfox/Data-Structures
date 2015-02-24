@@ -47,16 +47,17 @@ public:
 
 	/// add an edge to the graph (input: src, des, weight)
 	void addEdge(int i, int j, int w = 1);
-	
+
 	/// get the transpose of the graph
 	GraphAL transpose();
-	
+
 	/// Bread-first search of the graph from source vertex v
 	vector<int> BFS(int v);
 
 	/// Depth-first search of the graph visiting all vertices
-	vector<int> DFS(bool classify_edges=false);
-	
+	vector<int> DFS(bool classify_edges=false); //recursive
+	vector<int> DFS2(); //iterative (stack)
+
 	/// Return a topological sort of the graph stored as vector of vertex indices
 	vector<int> TopoSort();
 
@@ -86,7 +87,8 @@ protected:
 
 private:
 	//Utility function for depth first search, increment time for stamping
-	void DFSUtil(int u, int& time, vector<int>& ret, bool classify_edges = false);
+	void DFSUtil(int u, int& time, vector<int>& dfs, bool classify_edges = false); //recursive
+	void DFSUtil2(int u, int& time, vector<int>& dfs); //iterative
 
 	//Utility function for topological sorting, return stack of topo sort
 	void TopoSortUtil(int v, vector<int>& ts);
@@ -117,12 +119,11 @@ void GraphAL::addEdge(int u, int v, int w) {
 }
 
 vector<int> GraphAL::BFS(int v) {
-	vector<int> ret;
-	
+	vector<int> bfs;
+
 	//reset all vertices
 	for(int u = 0; u < V; ++u) {
-		vs[u].tag = 'w'; //set all nodes as white (undiscovered)
-		vs[u].parent = 0; 
+		vs[u].tag = 'w'; vs[u].parent = 0; vs[u].d = vs[u].f = 0;
 	}
 
 	vs[v].tag = 'g'; //v tag as grey
@@ -133,7 +134,7 @@ vector<int> GraphAL::BFS(int v) {
 	q.push_back(v);
 	while(!q.empty()) {
 		v = q.front(); q.pop_front();
-		ret.push_back(v);
+		bfs.push_back(v);
 		for(list<AdjElem>::const_iterator it = adj[v].begin(); it != adj[v].end(); ++it) {
 			int u = it->vidx;
 			if(vs[u].tag == 'w') { //only process white (undiscovered) vertices
@@ -145,37 +146,49 @@ vector<int> GraphAL::BFS(int v) {
 		}
 		vs[v].tag = 'b'; //finished discovering all v's neighbors, set as black
 	}
-	return ret;
+	return bfs;
 }
 
 vector<int> GraphAL::DFS(bool classify_edges) 
 {
 	//reset all vertices
 	for(int u = 0; u < V; ++u) {
-		vs[u].tag = 'w'; //set all nodes as white (undiscovered)
-		vs[u].parent = 0; 
+		vs[u].tag = 'w'; vs[u].parent = 0; vs[u].d = vs[u].f = 0;
 	}
-	
-	vector<int> ret;
+
+	vector<int> dfs;
 	int time = 0;
 	for(int u = 0; u < V; ++u) {
-		if(vs[u].tag == 'w') DFSUtil(u, time, ret, classify_edges); //only process white vertices
+		if(vs[u].tag == 'w') DFSUtil(u, time, dfs, classify_edges); //only process white vertices
 	}
-	return ret;
+	return dfs;
 }
 
-void GraphAL::DFSUtil(int u, int& time, vector<int>& ret, bool classify_edges) 
+vector<int> GraphAL::DFS2() 
 {
-	vs[u].d = ++time;
-	vs[u].tag = 'g';
-	ret.push_back(u);
-	
+	//reset all vertices
+	for(int u = 0; u < V; ++u) {
+		vs[u].tag = 'w'; vs[u].parent = 0; vs[u].d = vs[u].f = 0;
+	}
+
+	vector<int> dfs;
+	int time = 0;
+	for(int u = 0; u < V; ++u) {
+		if(vs[u].tag == 'w') DFSUtil2(u, time, dfs); //only process white vertices
+	}
+	return dfs;
+}
+
+void GraphAL::DFSUtil(int u, int& time, vector<int>& dfs, bool classify_edges) 
+{
+	vs[u].d = ++time; vs[u].tag = 'g';
+	dfs.push_back(u);
 	for(list<AdjElem>::const_iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
 		int v = it->vidx;
 		if(vs[v].tag == 'w') {
 			if(classify_edges) cout << "Edge ("<<u<<", "<<v<<") is tree edge" << endl;
 			vs[v].parent = u;
-			DFSUtil(v, time, ret, classify_edges);
+			DFSUtil(v, time, dfs, classify_edges);
 		} else if(classify_edges) {
 			if(vs[v].tag == 'g') cout << "Edge ("<<u<<", "<<v<<") is back edge" << endl;
 			else if(vs[u].d < vs[v].d) cout << "Edge ("<<u<<", "<<v<<") is forward edge" << endl;
@@ -186,6 +199,26 @@ void GraphAL::DFSUtil(int u, int& time, vector<int>& ret, bool classify_edges)
 	vs[u].f = ++time;
 }
 
+void GraphAL::DFSUtil2(int u, int& time, vector<int>& dfs) 
+{
+	vs[u].tag = 'g'; vs[u].d = ++time;  //color as grey
+	deque<int> s; //stack
+	s.push_back(u);
+	while(!s.empty()) {
+		u = s.back(); s.pop_back(); //v is always grey
+		dfs.push_back(u);
+		//process u's neighbors in reverse order of adajency list, just to be consistent with recursive version
+		for(list<AdjElem>::const_reverse_iterator it = adj[u].rbegin(); it != adj[u].rend(); ++it) {
+			int v = it->vidx;
+			if(vs[v].tag == 'w') {
+				vs[v].parent = u; vs[v].tag = 'g';  vs[v].d = ++time;
+				s.push_back(v); //push to stack
+			}
+		}
+	}
+	vs[u].tag = 'b'; vs[u].f = ++time;
+}
+
 vector<int> GraphAL::TopoSort() 
 {
 	for(int v = 0; v < V; ++v) vs[v].tag = 'w';
@@ -193,7 +226,7 @@ vector<int> GraphAL::TopoSort()
 	vector<int> ts;
 	for(int v = 0; v < V; ++v)
 		if(vs[v].tag == 'w') TopoSortUtil(v, ts);
-	
+
 	return ts;
 }
 
@@ -219,7 +252,7 @@ vector<vector<int> > GraphAL::findSCC()
 	vector<int> ts; //step 1, DFS of graph, get topo sort
 	for(int v = 0; v < V; ++v)
 		if(vs[v].tag == 'w') TopoSortUtil(v, ts);
-	
+
 	GraphAL gT = transpose(); //step 2, get transpose of graph gT
 
 	int time = 0;
