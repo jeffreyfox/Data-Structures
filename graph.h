@@ -258,9 +258,9 @@ vector<vector<int> > GraphAL::findSCC()
 	int time = 0;
 	vector<int> dfs;//step 3, dfs of gT in order of ts
 	for(vector<int>::const_iterator it = ts.begin(); it != ts.end(); ++it) {
-		if(gT.vs[*it].tag == 'w') {
+		if(gT.vs[*it].tag == 'w') { //dfs of gT!
 			dfs.clear();
-			DFSUtil(*it, time, dfs);
+			gT.DFSUtil(*it, time, dfs); //dfs of gT!
 			scc.push_back(dfs);
 		}
 	}
