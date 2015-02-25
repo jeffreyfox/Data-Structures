@@ -7,6 +7,8 @@
 #include <deque>
 #include <climits>
 #include <cassert>
+#include <algorithm>
+#include "unionfind.h"
 
 using namespace std;
 
@@ -25,6 +27,21 @@ struct Vertex {
 ostream& operator<<(ostream& os, const Vertex& v) {
 	os << "(" << v.index << ", (" << v.d << " " << v.f << ")) ";
 	return os;
+}
+
+struct Edge {
+	int src, des, weight;
+	Edge() : src(-1), des(-1), weight(-1) {}
+	Edge(int s, int d, int w) : src(s), des(d), weight(w) {}
+};
+
+ostream& operator<<(ostream& os, const Edge& e) {
+	os << "(" << e.src << "-" << e.des << ", " << e.weight << ")) ";
+	return os;
+}
+
+bool operator<(const Edge& e1, const Edge& e2) {
+	return e1.weight < e2.weight;
 }
 
 // element in the adajcency list
@@ -68,6 +85,9 @@ public:
 
 	/// Return all the strongly connected components of a directed graph
 	vector<vector<int> > findSCC();
+	
+	/// find mininum spanning tree (Krukal)
+	vector<Edge> MSTKruskal();
 
 	/// Count number of paths from vertex u to v (using depth-first search)
 	int countPaths(int u, int v) { return countPathsUtil(u, v); }
@@ -281,6 +301,28 @@ vector<vector<int> > GraphAL::findSCC()
 		}
 	}
 	return scc;
+}
+
+vector<Edge> GraphAL::MSTKruskal() {
+	assert(type == UNDIRECTED);
+	vector<Edge> edges, MSTedges;
+	for(int u = 0; u < V; ++u) {
+		for(list<AdjElem>::const_iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
+			int v = it->vidx;
+			if(u < v) edges.push_back(Edge(u, v, it->weight));
+		}
+	}
+	sort(edges.begin(), edges.end());
+
+	UnionFind uf(edges.size());
+	for(unsigned k = 0; k < edges.size(); ++k) {
+		int p1 = edges[k].src, p2 = edges[k].des;
+		if(uf.Find(p1) != uf.Find(p2)) {
+			MSTedges.push_back(edges[k]);
+			uf.Union(p1, p2);
+		}
+	}
+	return MSTedges;
 }
 
 vector<vector<int> > GraphAL::findPaths(int u, int v) {
