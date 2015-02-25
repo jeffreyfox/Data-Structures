@@ -85,9 +85,10 @@ public:
 
 	/// Return all the strongly connected components of a directed graph
 	vector<vector<int> > findSCC();
-	
-	/// find mininum spanning tree (Krukal)
+
+	/// find mininum spanning tree (Krukal, Prim)
 	vector<Edge> MSTKruskal();
+	vector<Edge> MSTPrim();
 
 	/// Count number of paths from vertex u to v (using depth-first search)
 	int countPaths(int u, int v) { return countPathsUtil(u, v); }
@@ -320,6 +321,45 @@ vector<Edge> GraphAL::MSTKruskal() {
 		if(uf.Find(p1) != uf.Find(p2)) {
 			MSTedges.push_back(edges[k]);
 			uf.Union(p1, p2);
+		}
+	}
+	return MSTedges;
+}
+
+vector<Edge> GraphAL::MSTPrim()
+{
+	assert(type == UNDIRECTED);
+	for(int u = 0; u < V; ++u) {
+		vs[u].d = INT_MAX; vs[u].parent = -1; vs[u].tag = 'w';
+	}
+	vs[0].d = 0;
+	for(int t = 0; t < V-1; ++t) { //do it V-1 times
+		//find the one with smallest distance
+		int u = 0, mind = INT_MAX;
+		for(int k = 0; k < V; ++k) {
+			if(vs[k].tag == 'w' && vs[k].d < mind) {
+				mind = vs[k].d; u = k; 
+			}
+		}
+		vs[u].tag = 'b'; //u is part of MST, mark as black
+		//only update unselected (white) neighbors
+		for(list<AdjElem>::const_iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
+			int v = it->vidx;
+			if(vs[v].tag == 'w' && vs[v].d > it->weight) { 
+				vs[v].d = it->weight; vs[v].parent = u;
+			}
+		}
+	}
+	//now prepare vector<Edge> from parent attribute
+	vector<Edge> MSTedges;
+	for(int v = 0; v < V; ++v) {
+		int u = vs[v].parent;
+		if(u != -1) {
+			int weight = -1;
+			for(list<AdjElem>::const_iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
+				if(it->vidx == v) weight = it->weight;
+			}
+			MSTedges.push_back(Edge(u, v, weight));
 		}
 	}
 	return MSTedges;
