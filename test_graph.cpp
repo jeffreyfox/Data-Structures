@@ -87,6 +87,22 @@ void testGraph(int argc, char* argv[])
 	}
 	cout << endl;
 
+	//graph from CLRS P625 Fig 23.1
+	GraphAL hh(9, UNDIRECTED);
+	hh.addEdge(0, 1, 4); hh.addEdge(0, 7, 8);
+	hh.addEdge(1, 2, 8); hh.addEdge(1, 7, 11);
+	hh.addEdge(2, 3, 7); hh.addEdge(2, 5, 4); hh.addEdge(2, 8, 2);
+	hh.addEdge(3, 4, 9); hh.addEdge(3, 5, 14);
+	hh.addEdge(4, 5, 10);
+	hh.addEdge(5, 6, 2);
+	hh.addEdge(6, 7, 1); hh.addEdge(6, 8, 6);
+	hh.addEdge(7, 8, 7);
+	cout << hh << endl;
+	vector<Edge> MSTedges = hh.MSTKruskal();
+	for(unsigned k = 0; k < MSTedges.size(); ++k) 
+		cout << MSTedges[k] << " ";
+	cout << endl;
+
 	int p = 3, v = 9;
 	cout << " number of paths between " << p << " and " << v << " is " << g.countPaths(p,v) << endl;
 	vector<vector<int> > ret = g.findPaths(p, v);
