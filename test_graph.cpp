@@ -97,10 +97,18 @@ void testGraph(int argc, char* argv[])
 	hh.addEdge(5, 6, 2);
 	hh.addEdge(6, 7, 1); hh.addEdge(6, 8, 6);
 	hh.addEdge(7, 8, 7);
-	cout << hh << endl;
-	vector<Edge> MSTedges = hh.MSTKruskal();
-	for(unsigned k = 0; k < MSTedges.size(); ++k) 
-		cout << MSTedges[k] << " ";
+	
+	vector<Edge> MST;
+	cout << "MST Kruskal's algorithm: " << endl;
+	MST = hh.MSTKruskal();
+	for(unsigned k = 0; k < MST.size(); ++k) 
+		cout << MST[k] << " ";
+	cout << endl;
+	
+	cout << "MST Prim's algorithm: " << endl;
+	MST = hh.MSTPrim();
+	for(unsigned k = 0; k < MST.size(); ++k) 
+		cout << MST[k] << " ";
 	cout << endl;
 
 	int p = 3, v = 9;
