@@ -123,6 +123,7 @@ void testGraph(int argc, char* argv[])
 	*/
 
 	vector<bool> ap; //articulation points
+	vector<Edge> bridge; //bridges
 	//graphs from http://www.geeksforgeeks.org/articulation-points-or-cut-vertices-in-a-graph/
 	GraphAL g1(5);
 	g1.addEdge(1, 0);
@@ -162,5 +163,23 @@ void testGraph(int argc, char* argv[])
 	cout << "Articulation points in g3: ";
 	for(unsigned k = 0; k < ap.size(); ++k) 
 		if(ap[k]) cout << k << " ";
+	cout << endl;
+
+	bridge = g1.Bridge();
+	cout << "Bridges in g1: ";
+	for(unsigned k = 0; k < bridge.size(); ++k) 
+		cout << bridge[k] << " ";
+	cout << endl;
+
+	bridge = g2.Bridge();
+	cout << "Bridges in g2: ";
+	for(unsigned k = 0; k < bridge.size(); ++k) 
+		cout << bridge[k] << " ";
+	cout << endl;
+
+	bridge = g3.Bridge();
+	cout << "Bridges in g3: ";
+	for(unsigned k = 0; k < bridge.size(); ++k) 
+		cout << bridge[k] << " ";
 	cout << endl;
 }
