@@ -36,7 +36,7 @@ struct Edge {
 };
 
 ostream& operator<<(ostream& os, const Edge& e) {
-	os << "(" << e.src << "-" << e.des << ", " << e.weight << ")) ";
+	os << "(" << e.src << "-" << e.des << ", " << e.weight << "))";
 	return os;
 }
 
@@ -86,6 +86,9 @@ public:
 	/// Return all the strongly connected components of a directed graph
 	vector<vector<int> > findSCC();
 
+	///find all articulation points in O(E), return vector of boolean
+	vector<bool> AP();
+
 	/// find mininum spanning tree (Krukal, Prim)
 	vector<Edge> MSTKruskal();
 	vector<Edge> MSTPrim();
@@ -117,14 +120,17 @@ protected:
 	vector<list<AdjElem> > adj; //adjacency list of each vertex
 
 private:
-	//Utility function for depth first search, increment time for stamping
+	/// Utility function for depth first search, increment time for stamping
 	void DFSUtil(int u, int& time, vector<int>& dfs, bool classify_edges = false); //recursive
 	void DFSUtil2(int u, int& time, vector<int>& dfs); //iterative
 
-	//Utility function for topological sorting, return stack of topo sort
+	/// Utility function for topological sorting, return stack of topo sort
 	void TopoSortUtil(int v, vector<int>& ts);
 
-	//Utility functions for path-finding between two vertices
+	/// Utility funciton for articulation point searching
+	void APUtil(int v, int &time, vector<int>& low, vector<bool> &ap);
+
+	/// Utility functions for path-finding between two vertices
 	int countPathsUtil(int u, int v);
 	void findPathsUtil(int u, int v, const vector<int> &path, vector<vector<int> >& ret);
 };
@@ -154,7 +160,7 @@ vector<int> GraphAL::BFS(int v) {
 
 	//reset all vertices
 	for(int u = 0; u < V; ++u) {
-		vs[u].tag = 'w'; vs[u].parent = 0; vs[u].d = vs[u].f = 0;
+		vs[u].tag = 'w'; vs[u].parent = -1; vs[u].d = vs[u].f = 0;
 	}
 
 	vs[v].tag = 'g'; //v tag as grey
@@ -184,7 +190,7 @@ vector<int> GraphAL::DFS(bool classify_edges)
 {
 	//reset all vertices
 	for(int u = 0; u < V; ++u) {
-		vs[u].tag = 'w'; vs[u].parent = 0; vs[u].d = vs[u].f = 0;
+		vs[u].tag = 'w'; vs[u].parent = -1; vs[u].d = vs[u].f = 0;
 	}
 
 	vector<int> dfs;
@@ -199,7 +205,7 @@ vector<int> GraphAL::DFS2()
 {
 	//reset all vertices
 	for(int u = 0; u < V; ++u) {
-		vs[u].tag = 'w'; vs[u].parent = 0; vs[u].d = vs[u].f = 0;
+		vs[u].tag = 'w'; vs[u].parent = -1; vs[u].d = vs[u].f = 0;
 	}
 
 	vector<int> dfs;
@@ -302,6 +308,53 @@ vector<vector<int> > GraphAL::findSCC()
 		}
 	}
 	return scc;
+}
+
+
+vector<bool> GraphAL::AP() 
+{
+	//reset all vertices
+	for(int u = 0; u < V; ++u) {
+		vs[u].tag = 'w'; vs[u].parent = -1; vs[u].d = vs[u].f = 0;
+	}
+
+	//ap[V] is true if v is articulation point
+	vector<bool> ap(V, false);
+	//low[v] is the minimum discovery time of all vertices reachable from v and v's descedants 
+	//(except from edge [v, v.parent]).
+	vector<int> low(V, -1);
+	int time = 0;
+	for(int u = 0; u < V; ++u) {
+		if(vs[u].tag == 'w') APUtil(u, time, low, ap); //only process white (unvisited) vertices
+	}
+	return ap;
+}
+
+void GraphAL::APUtil(int u, int &time, vector<int>& low, vector<bool> &ap)
+{
+	//first time visited, init low and d
+	vs[u].d = low[u] = ++time;
+	vs[u].tag = 'b'; //color as black (visited)!
+	int children = 0; //children for the DFS tree
+	for(list<AdjElem>::const_iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
+		int v = it->vidx; //v is u's child
+		if(vs[v].tag == 'w') { //not visited before
+			 vs[v].parent = u;
+			 children ++; //only increment when v is not visited before
+			 APUtil(v, time, low, ap);//recursively call for u's child v
+			
+			 low[u] = min(low[u], low[v]); //this is where low[u] becomes smaller
+			 //if u is not root and has a child v that doesn't have any back edge to u's ancestors, then u is art. point
+			 //we check the minimum reachable vertex from v, low[v], and see if it is >= the discovery time of u, vs[u].d
+			 //if equal that means there's a back edge to u, but not above, still u is articulation point.
+			 if(vs[u].parent != -1 && low[v] >= vs[u].d) ap[u] = true;
+
+		} else if(vs[u].parent != v) { //visited before, back edge, excluding edge [u, u.p] case
+			low[u] = min(low[u], vs[v].d); //this is where low[u] becomes smaller
+		}
+		//finally, if u 's root and has >1 children, it is articulation point
+		if(vs[u].parent == -1 && children > 1)  ap[u] = true;
+	}
 }
 
 vector<Edge> GraphAL::MSTKruskal() {
