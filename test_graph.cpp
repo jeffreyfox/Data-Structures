@@ -39,7 +39,7 @@ void testGraph(int argc, char* argv[])
 		cout << char(dfs[k]+'m') << " ";
 	}
 	cout << endl;
-	
+
 	cout << "Topological sort of graph g: ";
 	ts = g.TopoSort();
 	for(unsigned k = 0; k < ts.size(); ++k) {
@@ -57,15 +57,15 @@ void testGraph(int argc, char* argv[])
 	h.addEdge(5, 6);
 	h.addEdge(6, 5); h.addEdge(6, 7);
 	h.addEdge(7, 7);
-	
+
 	cout << "DFS of graph h: ";
 	dfs = h.DFS();
 	for(unsigned k = 0; k < dfs.size(); ++k) {
 		cout << char(dfs[k]+'a') << " ";
 	}
 	cout << endl;
-	cout << "Vertices are " << endl;
-	h.printVertices();
+	//cout << "Vertices are " << endl;
+	//h.printVertices();
 
 	cout << "DFS of graph h: ";
 	dfs = h.DFS2();
@@ -73,8 +73,8 @@ void testGraph(int argc, char* argv[])
 		cout << char(dfs[k]+'a') << " ";
 	}
 	cout << endl;
-	cout << "Vertices are " << endl;
-	h.printVertices();
+	//cout << "Vertices are " << endl;
+	//h.printVertices();
 
 	cout << "SCC of graph h: ";
 	scc = h.findSCC();
@@ -97,27 +97,70 @@ void testGraph(int argc, char* argv[])
 	hh.addEdge(5, 6, 2);
 	hh.addEdge(6, 7, 1); hh.addEdge(6, 8, 6);
 	hh.addEdge(7, 8, 7);
-	
+
 	vector<Edge> MST;
 	cout << "MST Kruskal's algorithm: " << endl;
 	MST = hh.MSTKruskal();
 	for(unsigned k = 0; k < MST.size(); ++k) 
 		cout << MST[k] << " ";
 	cout << endl;
-	
+
 	cout << "MST Prim's algorithm: " << endl;
 	MST = hh.MSTPrim();
 	for(unsigned k = 0; k < MST.size(); ++k) 
 		cout << MST[k] << " ";
 	cout << endl;
 
-	int p = 3, v = 9;
+	/*	int p = 3, v = 9;
 	cout << " number of paths between " << p << " and " << v << " is " << g.countPaths(p,v) << endl;
 	vector<vector<int> > ret = g.findPaths(p, v);
 	cout << " number of paths between " << p << " and " << v << " is " << ret.size() << endl;
 	for(unsigned int k = 0; k < ret.size(); ++k) {
-		cout << "  Path " << k << ": ";
-		for(unsigned int j = 0; j < ret[k].size(); ++j) cout << ret[k][j] << " ";
-		cout << endl;
+	cout << "  Path " << k << ": ";
+	for(unsigned int j = 0; j < ret[k].size(); ++j) cout << ret[k][j] << " ";
+	cout << endl;
 	}
+	*/
+
+	vector<bool> ap; //articulation points
+	//graphs from http://www.geeksforgeeks.org/articulation-points-or-cut-vertices-in-a-graph/
+	GraphAL g1(5);
+	g1.addEdge(1, 0);
+	g1.addEdge(0, 2);
+	g1.addEdge(2, 1);
+	g1.addEdge(0, 3);
+	g1.addEdge(3, 4);
+
+	GraphAL g2(4);
+	g2.addEdge(0, 1);
+	g2.addEdge(1, 2);
+	g2.addEdge(2, 3);
+
+	GraphAL g3(7);
+	g3.addEdge(0, 1);
+	g3.addEdge(1, 2);
+	g3.addEdge(2, 0);
+	g3.addEdge(1, 3);
+	g3.addEdge(1, 4);
+	g3.addEdge(1, 6);
+	g3.addEdge(3, 5);
+	g3.addEdge(4, 5);
+
+	ap = g1.AP();
+	cout << "Articulation points in g1: ";
+	for(unsigned k = 0; k < ap.size(); ++k) 
+		if(ap[k]) cout << k << " ";
+	cout << endl;
+
+	ap = g2.AP();
+	cout << "Articulation points in g2: ";
+	for(unsigned k = 0; k < ap.size(); ++k) 
+		if(ap[k]) cout << k << " ";
+	cout << endl;
+
+	ap = g3.AP();
+	cout << "Articulation points in g3: ";
+	for(unsigned k = 0; k < ap.size(); ++k) 
+		if(ap[k]) cout << k << " ";
+	cout << endl;
 }
