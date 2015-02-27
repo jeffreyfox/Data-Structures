@@ -86,8 +86,11 @@ public:
 	/// Return all the strongly connected components of a directed graph
 	vector<vector<int> > findSCC();
 
-	///find all articulation points in O(E), return vector of boolean
+	/// Find all articulation points in O(E), return vector of boolean
 	vector<bool> AP();
+
+	/// Find all bridges in O(E), return vector of edges
+	vector<Edge> Bridge();
 
 	/// find mininum spanning tree (Krukal, Prim)
 	vector<Edge> MSTKruskal();
@@ -129,6 +132,9 @@ private:
 
 	/// Utility funciton for articulation point searching
 	void APUtil(int v, int &time, vector<int>& low, vector<bool> &ap);
+
+	/// Utility funciton for bridge searching
+	void BridgeUtil(int v, int &time, vector<int>& low, vector<Edge> &bridge);
 
 	/// Utility functions for path-finding between two vertices
 	int countPathsUtil(int u, int v);
@@ -310,7 +316,6 @@ vector<vector<int> > GraphAL::findSCC()
 	return scc;
 }
 
-
 vector<bool> GraphAL::AP() 
 {
 	//reset all vertices
@@ -339,21 +344,64 @@ void GraphAL::APUtil(int u, int &time, vector<int>& low, vector<bool> &ap)
 	for(list<AdjElem>::const_iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
 		int v = it->vidx; //v is u's child
 		if(vs[v].tag == 'w') { //not visited before
-			 vs[v].parent = u;
-			 children ++; //only increment when v is not visited before
-			 APUtil(v, time, low, ap);//recursively call for u's child v
-			
-			 low[u] = min(low[u], low[v]); //this is where low[u] becomes smaller
-			 //if u is not root and has a child v that doesn't have any back edge to u's ancestors, then u is art. point
-			 //we check the minimum reachable vertex from v, low[v], and see if it is >= the discovery time of u, vs[u].d
-			 //if equal that means there's a back edge to u, but not above, still u is articulation point.
-			 if(vs[u].parent != -1 && low[v] >= vs[u].d) ap[u] = true;
+			vs[v].parent = u;
+			children ++; //only increment when v is not visited before
+			APUtil(v, time, low, ap);//recursively call for u's child v
+
+			low[u] = min(low[u], low[v]); //this is where low[u] becomes smaller
+			//if u is not root and has a child v that doesn't have any back edge to u's ancestors, then u is art. point
+			//we check the minimum reachable vertex from v, low[v], and see if it is >= the discovery time of u, vs[u].d
+			//if equal that means there's a back edge to u, but not above, still u is articulation point.
+			if(vs[u].parent != -1 && low[v] >= vs[u].d) ap[u] = true;
 
 		} else if(vs[u].parent != v) { //visited before, back edge, excluding edge [u, u.p] case
 			low[u] = min(low[u], vs[v].d); //this is where low[u] becomes smaller
 		}
 		//finally, if u 's root and has >1 children, it is articulation point
 		if(vs[u].parent == -1 && children > 1)  ap[u] = true;
+	}
+}
+
+vector<Edge> GraphAL::Bridge() 
+{
+	//reset all vertices
+	for(int u = 0; u < V; ++u) {
+		vs[u].tag = 'w'; vs[u].parent = -1; vs[u].d = vs[u].f = 0;
+	}
+
+	//ap[V] is true if v is articulation point
+	vector<Edge> bridge;
+	//low[v] is the minimum discovery time of all vertices reachable from v and v's descedants 
+	//(except from edge [v, v.parent]).
+	vector<int> low(V, -1);
+	int time = 0;
+	for(int u = 0; u < V; ++u) {
+		if(vs[u].tag == 'w') BridgeUtil(u, time, low, bridge); //only process white (unvisited) vertices
+	}
+	return bridge;
+}
+
+void GraphAL::BridgeUtil(int u, int &time, vector<int>& low, vector<Edge> &bridge)
+{
+	//first time visited, init low and d
+	vs[u].d = low[u] = ++time;
+	vs[u].tag = 'b'; //color as black (visited)!
+	for(list<AdjElem>::const_iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
+		int v = it->vidx; //v is u's child
+		if(vs[v].tag == 'w') { //not visited before
+			vs[v].parent = u;
+			BridgeUtil(v, time, low, bridge);//recursively call for u's child v
+
+			low[u] = min(low[u], low[v]); //this is where low[u] becomes smaller
+
+			//if u has a child v that doesn't have any back edge to u or u's ancestors, then u is art. point
+			//we check the minimum reachable vertex from v, low[v], and see if it is > the discovery time of u, vs[u].d
+			//if equal that means there's a back edge to u (not thru [v,u]), then u-v is not bridge
+			if(low[v] > vs[u].d) bridge.push_back(Edge(u, v, 1));
+
+		} else if(vs[u].parent != v) { //visited before, back edge, excluding edge [u, u.p] case
+			low[u] = min(low[u], vs[v].d); //this is where low[u] becomes smaller
+		}
 	}
 }
 
