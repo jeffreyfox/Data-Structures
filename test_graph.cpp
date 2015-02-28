@@ -2,7 +2,7 @@
 
 void testGraph(int argc, char* argv[])
 {
-	vector<int> dfs, bfs, ts; //ts: topological sort
+vector<int> dfs, bfs, ts; //ts: topological sort
 	vector<vector<int> > scc; //strongly connected components
 
 	//graph from CLRS P615 Fig 22.8
@@ -77,7 +77,7 @@ void testGraph(int argc, char* argv[])
 	//h.printVertices();
 
 	cout << "SCC of graph h: ";
-	scc = h.findSCC();
+	scc = h.SCC();
 	for(unsigned i = 0; i < scc.size(); ++i) {
 		cout << "(";
 		for(unsigned j = 0; j < scc[i].size(); ++j) {
@@ -126,27 +126,14 @@ void testGraph(int argc, char* argv[])
 	vector<Edge> bridge; //bridges
 	//graphs from http://www.geeksforgeeks.org/articulation-points-or-cut-vertices-in-a-graph/
 	GraphAL g1(5);
-	g1.addEdge(1, 0);
-	g1.addEdge(0, 2);
-	g1.addEdge(2, 1);
-	g1.addEdge(0, 3);
-	g1.addEdge(3, 4);
+	g1.addEdge(1, 0); g1.addEdge(0, 2); g1.addEdge(2, 1); g1.addEdge(0, 3);	g1.addEdge(3, 4);
 
 	GraphAL g2(4);
-	g2.addEdge(0, 1);
-	g2.addEdge(1, 2);
-	g2.addEdge(2, 3);
+	g2.addEdge(0, 1); g2.addEdge(1, 2);	g2.addEdge(2, 3);
 
 	GraphAL g3(7);
-	g3.addEdge(0, 1);
-	g3.addEdge(1, 2);
-	g3.addEdge(2, 0);
-	g3.addEdge(1, 3);
-	g3.addEdge(1, 4);
-	g3.addEdge(1, 6);
-	g3.addEdge(3, 5);
-	g3.addEdge(4, 5);
-
+	g3.addEdge(0, 1); g3.addEdge(1, 2);	g3.addEdge(2, 0); g3.addEdge(1, 3); 
+	g3.addEdge(1, 4); g3.addEdge(1, 6); g3.addEdge(3, 5); g3.addEdge(4, 5); 
 	ap = g1.AP();
 	cout << "Articulation points in g1: ";
 	for(unsigned k = 0; k < ap.size(); ++k) 
@@ -182,4 +169,33 @@ void testGraph(int argc, char* argv[])
 	for(unsigned k = 0; k < bridge.size(); ++k) 
 		cout << bridge[k] << " ";
 	cout << endl;
+
+	cout << endl;
+
+	///Single-source minimum path problem
+	//graph from CLRS P652 Fig 24.4
+	GraphAL gs(5, DIRECTED);
+	gs.addEdge(0,1,6); gs.addEdge(0,3,7);
+	gs.addEdge(1,2,5); gs.addEdge(1,3,8); gs.addEdge(1,4,-4);
+	gs.addEdge(2,1,-2);
+	gs.addEdge(3,2,-3); gs.addEdge(3,4,9);
+	gs.addEdge(4,0,2); gs.addEdge(4,2,7);
+
+	cout << "Running Bellman-ford algorithm on graph gs ..." << endl;
+	bool tag = gs.BellmanFord(0);
+	if(tag) cout << "Graph has no negative cycle." << endl;
+	else cout << "Graph has negative cycle!" << endl;
+	gs.printVertices();
+
+	//graph from CLRS P656 Fig 24.5
+	GraphAL gt(6, DIRECTED);
+	gt.addEdge(0,1,5); gt.addEdge(0,2,3);
+	gt.addEdge(1,2,2); gt.addEdge(1,3,6);
+	gt.addEdge(2,3,7); gt.addEdge(2,4,4); gt.addEdge(2,5,2);
+	gt.addEdge(3,4,-1); gt.addEdge(3,5,1);
+	gt.addEdge(4,5,-2);
+
+	cout << "Running shorted-path algorithm on dag gt ..." << endl;
+	gt.SPdag(1);
+	gt.printVertices();
 }
