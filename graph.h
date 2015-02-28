@@ -114,7 +114,7 @@ public:
 	int countPaths(int u, int v) { return countPathsUtil(u, v); }
 
 	/// Find number of paths from vertex u to v (using depth-first search)
-	vector<vector<int> > findPaths(int u, int v);
+	vector<vector<int> > FindPaths(int u, int v);
 
 	/// whether the graph can be colored with 2 colors
 	bool twoColor(int v);
@@ -159,7 +159,7 @@ private:
 
 	/// Utility functions for path-finding between two vertices
 	int countPathsUtil(int u, int v);
-	void findPathsUtil(int u, int v, const vector<int> &path, vector<vector<int> >& ret);
+	void FindPathsUtil(int u, int v, const vector<int> &path, vector<vector<int> >& ret);
 };
 
 GraphAL::GraphAL(int VV, GraphType t) : V(VV), type(t) { 
@@ -587,10 +587,12 @@ void GraphAL::Relax(int u, int v, int wt) {
 	}
 }
 
-vector<vector<int> > GraphAL::findPaths(int u, int v) {
+vector<vector<int> > GraphAL::FindPaths(int u, int v) {
+	for(int k = 0; k < V; ++k) vs[k].tag = 'w';
+
 	vector<int> path;
 	vector<vector<int> > ret;
-	findPathsUtil(u, v, path, ret);
+	FindPathsUtil(u, v, path, ret);
 	return ret;
 }
 
@@ -604,18 +606,25 @@ int GraphAL::countPathsUtil(int u, int v)
 	return n;
 }
 
-void GraphAL::findPathsUtil(int u, int v, const vector<int> &path, vector<vector<int> >& ret)
+void GraphAL::FindPathsUtil(int u, int v, const vector<int> &path, vector<vector<int> >& ret)
 {
 	vector<int> newpath(path);
 	newpath.push_back(u);
 	if(u == v) {
 		ret.push_back(newpath);
+		vs[u].tag = 'w'; //retrace, recolor as white
 		return;
 	}
+	vs[u].tag = 'g';
 	for(list<AdjElem>::const_iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
 		int w = it->vidx;
-		findPathsUtil(w, v, newpath, ret);
+		if(vs[w].tag == 'g') continue; //avoid back edge
+		else if(vs[w].tag == 'w') {
+			FindPathsUtil(w, v, newpath, ret);
+		}
 	}
+	//finish all neighbors, need to retrace
+	vs[u].tag = 'w';
 }
 
 void GraphAL::printPath(int src, int v) {
