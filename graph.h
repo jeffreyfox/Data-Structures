@@ -658,32 +658,79 @@ ostream& operator<<(ostream& os, const GraphAL& g) {
 	return os;
 }
 
+ostream& operator<<(ostream& os, const vector<vector<int> >& W) {
+	for(unsigned int k = 0; k < W.size(); ++k) {
+		for(unsigned int l = 0; l < W[k].size(); ++l) {
+			if(W[k][l] == INT_MAX) os << "inf ";
+			else os << W[k][l] << " ";
+		}
+		os << endl;
+	}
+	return os;
+}
+
 class GraphAM { //adjacency list form
 public:
 
-	GraphAM(int VV, GraphType t = UNDIRECTED) : V(VV), type(t) { adj.resize(V, vector<int>(V, 0)); };
+	GraphAM(int VV, GraphType t = UNDIRECTED) : V(VV), type(t) { 
+		adj.resize(V, vector<int>(V, INT_MAX)); 
+		for(int k = 0; k < V; ++k) adj[k][k] = 0;
+	};
 	void addEdge(int i, int j, int w = 1) {
 		adj[i][j] = w;
 		if(type == UNDIRECTED) adj[j][i] = w;
 	}
-	friend ostream& operator<<(ostream& os, const GraphAM& g);
+
+	///All pair shorted paths algorithm by extending one edge at a time
+	vector<vector<int> > AllPairsSPSlow();
+
+	///All pair shorted paths algorithm by utilizing associativity of "multiplication" and "saturation property",
+	///i.e. L(n) = L(n+1) = ...
+	vector<vector<int> > AllPairsSPFast();
+
+	friend ostream& operator<<(ostream& os, const GraphAM& g) { os << g.adj; return os;}
 
 protected:
 	GraphType type;
 	int V;
 	vector<vector<int> > adj;
+
+private:
+	///Utility function to extend shorted path by "multiplying" two matrices
+	vector<vector<int> > ExtendSP(vector<vector<int> >& L, vector<vector<int> >& W);
 };
 
-ostream& operator<<(ostream& os, const GraphAM& g) {
-	os << "Number of vertices : " << g.V << endl;
-	for(int k = 0; k < g.V; ++k) {
-		os << k << ": ";
-		for(int l = 0; l < g.V; ++l) {
-			if(g.adj[k][l]) os << "(" << l << " " << g.adj[k][l] << ") ";
-		}
-		os << endl;
+vector<vector<int> > GraphAM::AllPairsSPSlow() {
+	int n = adj.size();
+	vector<vector<int> > apsp = adj;
+	for(int k = 0; k < n-2; ++k) { //calculate pow(adj, n-1)
+		apsp = ExtendSP(apsp, adj);
 	}
-	return os;
+	return apsp;
+}
+
+vector<vector<int> > GraphAM::AllPairsSPFast() {
+	int n = adj.size(), m = 1;
+	vector<vector<int> > apsp = adj;
+	while(m < n-1) { //calculate pow(adj, n-1)
+		apsp = ExtendSP(apsp, apsp);
+		m = 2*m;
+	}
+	return apsp;
+}
+
+vector<vector<int> > GraphAM::ExtendSP(vector<vector<int> >& L, vector<vector<int> >& W) {
+	int n = L.size();
+	vector<vector<int> > ret(n, vector<int>(n, INT_MAX));
+	for(int i = 0; i < n; ++i) {
+		for(int j = 0; j < n; ++j) {
+			for(int k = 0; k < n; ++k) {
+				int val = (L[i][k] == INT_MAX || W[k][j] == INT_MAX) ? INT_MAX : L[i][k]+W[k][j];
+				ret[i][j] = min(ret[i][j], val);
+			}
+		}
+	}
+	return ret;
 }
 
 #endif
