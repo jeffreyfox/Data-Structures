@@ -111,7 +111,7 @@ public:
 	void Dijkstra(int src);
 
 	/// Count number of paths from vertex u to v (using depth-first search)
-	int countPaths(int u, int v) { return countPathsUtil(u, v); }
+	int CountPaths(int u, int v);
 
 	/// Find number of paths from vertex u to v (using depth-first search)
 	vector<vector<int> > FindPaths(int u, int v);
@@ -158,7 +158,7 @@ private:
 	void Relax(int u, int v, int wt);
 
 	/// Utility functions for path-finding between two vertices
-	int countPathsUtil(int u, int v);
+	int CountPathsUtil(int u, int v);
 	void FindPathsUtil(int u, int v, const vector<int> &path, vector<vector<int> >& ret);
 };
 
@@ -587,6 +587,29 @@ void GraphAL::Relax(int u, int v, int wt) {
 	}
 }
 
+int GraphAL::CountPaths(int u, int v) { 
+	for(int k = 0; k < V; ++k) vs[k].tag = 'w';
+	return CountPathsUtil(u, v); 
+}
+
+int GraphAL::CountPathsUtil(int u, int v)
+{
+	if(u == v) { 
+		vs[u].tag = 'w'; //retrace, recolor as white
+		return 1; 
+	}
+	vs[u].tag = 'g';//visited
+	int n = 0;
+	for(list<AdjElem>::const_iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
+		int w = it->vidx;
+		if(vs[w].tag == 'w') {//only search for unvisited nodes
+			n += CountPathsUtil(w, v);
+		}
+	}
+	vs[u].tag = 'w';//reset as unvisited
+	return n;
+}
+
 vector<vector<int> > GraphAL::FindPaths(int u, int v) {
 	for(int k = 0; k < V; ++k) vs[k].tag = 'w';
 
@@ -594,16 +617,6 @@ vector<vector<int> > GraphAL::FindPaths(int u, int v) {
 	vector<vector<int> > ret;
 	FindPathsUtil(u, v, path, ret);
 	return ret;
-}
-
-int GraphAL::countPathsUtil(int u, int v)
-{
-	if(u == v) return 1; 
-	int n = 0;
-	for(list<AdjElem>::const_iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
-		n += countPathsUtil(it->vidx, v);
-	}
-	return n;
 }
 
 void GraphAL::FindPathsUtil(int u, int v, const vector<int> &path, vector<vector<int> >& ret)
@@ -618,8 +631,7 @@ void GraphAL::FindPathsUtil(int u, int v, const vector<int> &path, vector<vector
 	vs[u].tag = 'g';
 	for(list<AdjElem>::const_iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
 		int w = it->vidx;
-		if(vs[w].tag == 'g') continue; //avoid back edge
-		else if(vs[w].tag == 'w') {
+		if(vs[w].tag == 'w') {//only search for unvisited nodes
 			FindPathsUtil(w, v, newpath, ret);
 		}
 	}
