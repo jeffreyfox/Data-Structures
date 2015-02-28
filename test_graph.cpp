@@ -2,7 +2,7 @@
 
 void testGraph(int argc, char* argv[])
 {
-vector<int> dfs, bfs, ts; //ts: topological sort
+	vector<int> dfs, bfs, ts; //ts: topological sort
 	vector<vector<int> > scc; //strongly connected components
 
 	//graph from CLRS P615 Fig 22.8
@@ -198,4 +198,16 @@ vector<int> dfs, bfs, ts; //ts: topological sort
 	cout << "Running shorted-path algorithm on dag gt ..." << endl;
 	gt.SPdag(1);
 	gt.printVertices();
+	
+	//graph from CLRS P659 Fig 24.6
+	GraphAL gr(5, DIRECTED);
+	gr.addEdge(0,1,10); gr.addEdge(0,3,5);
+	gr.addEdge(1,2,1); gr.addEdge(1,3,2);
+	gr.addEdge(2,4,4); 
+	gr.addEdge(3,1,3); gr.addEdge(3,2,9); gr.addEdge(3,4,2);
+	gr.addEdge(4,0,7); gr.addEdge(4,2,6);
+
+	cout << "Running Dijkstra's algorithm on dag gr ..." << endl;
+	gr.Dijkstra(0);
+	gr.printVertices();
 }
