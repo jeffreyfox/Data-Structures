@@ -211,7 +211,7 @@ void testGraph(int argc, char* argv[])
 	gr.Dijkstra(0);
 	gr.printVertices();
 	
-		///All-pairs shorted paths
+	///All-pairs shorted paths
 	//graph from CLRS P690 Fig 25.1
 	GraphAM gu(5, DIRECTED);
 	gu.addEdge(0,1,3); gu.addEdge(0,2,8); gu.addEdge(0,4,-4);
@@ -221,12 +221,19 @@ void testGraph(int argc, char* argv[])
 	gu.addEdge(4,3,6);
 	cout << gu << endl;
 
-	vector<vector<int> > apsp;
 	cout << "Running all-pairs shortest paths algorithm (slow) on graph gu ... " << endl;
-	apsp = gu.AllPairsSPSlow();
-	cout << apsp << endl;
+	gu.AllPairsSPSlow();
+	cout << "Shorted path weight matrix is : " << endl;
+	gu.printSPWT();
 
-	cout << "Running all-pairs shortest paths algorithm (fast) on graph gu ... " << endl;
-	apsp = gu.AllPairsSPFast();
-	cout << apsp << endl;
+	gu.AllPairsSPFast();
+	cout << "Shorted path weight matrix is : " << endl;
+	gu.printSPWT();
+
+	cout << "Running Floyd-Warshall's all-pairs shortest paths algorithm on graph gu ... " << endl;
+	gu.AllPairsSPFW();
+	cout << "Shorted path weight matrix is : " << endl;
+	gu.printSPWT();
+	cout << "Shorted path predecessor matrix is : " << endl;
+	gu.printSPPR();
 }
