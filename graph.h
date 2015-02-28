@@ -16,7 +16,7 @@ using namespace std;
 struct Vertex {
 	int index; // a unique id in graph
 	int parent; // parent index in the BFS/DFS tree
-	int dist; // distance from the source in BFS search
+	int dist; // distance from the source
 	char tag; // tag for the state of the vertex. 'w': white, 'g' grey, 'b' black
 	int d, f; //discover and finish time of each vertex
 	bool visited; //whether vertex has been visited
@@ -25,7 +25,8 @@ struct Vertex {
 };
 
 ostream& operator<<(ostream& os, const Vertex& v) {
-	os << "(" << v.index << ", (" << v.d << " " << v.f << ")) ";
+	//	os << "(" << v.index << ", (" << v.d << " " << v.f << ")) ";
+	os << "(" << v.index << " " << v.dist << ") ";
 	return os;
 }
 
@@ -80,21 +81,31 @@ public:
 	vector<int> DFS(bool classify_edges=false); //recursive
 	vector<int> DFS2(); //iterative (stack)
 
+	/// Return whether a directed graph is cyclic or not using DFS search
+	bool IsCyclic();
+
 	/// Return a topological sort of the graph stored as vector of vertex indices
 	vector<int> TopoSort();
 
 	/// Return all the strongly connected components of a directed graph
-	vector<vector<int> > findSCC();
+	vector<vector<int> > SCC();
 
-	/// Find all articulation points in O(E), return vector of boolean
+	/// Find all articulation points of an undirected graph in O(E), return vector of boolean
 	vector<bool> AP();
 
-	/// Find all bridges in O(E), return vector of edges
+	/// Find all bridges of an undirected graph in O(E), return vector of edges
 	vector<Edge> Bridge();
 
 	/// find mininum spanning tree (Krukal, Prim)
 	vector<Edge> MSTKruskal();
 	vector<Edge> MSTPrim();
+
+	/// Bellman-Ford algorithm for the single-source shortest-path problem in O(VE)
+	/// Returns a boolean indicating whether there is a negative-weight cycle reachable from source
+	bool BellmanFord(int src);
+
+	/// Algorithm for the Single-source shortest path in directed acyclic grpahs in O(V+E)
+	void SPdag(int src);
 
 	/// Count number of paths from vertex u to v (using depth-first search)
 	int countPaths(int u, int v) { return countPathsUtil(u, v); }
@@ -110,6 +121,7 @@ public:
 		for(int v = 0; v < V; ++v) cout << vs[v] << " ";
 		cout << endl;
 	}
+
 	/// print path from src to v (using parent attribute)
 	void printPath(int src, int v);
 
@@ -127,6 +139,9 @@ private:
 	void DFSUtil(int u, int& time, vector<int>& dfs, bool classify_edges = false); //recursive
 	void DFSUtil2(int u, int& time, vector<int>& dfs); //iterative
 
+	/// Utility function to determine is a directed graph is cyclic or not
+	bool IsCyclicUtil(int u);
+
 	/// Utility function for topological sorting, return stack of topo sort
 	void TopoSortUtil(int v, vector<int>& ts);
 
@@ -135,6 +150,9 @@ private:
 
 	/// Utility funciton for bridge searching
 	void BridgeUtil(int v, int &time, vector<int>& low, vector<Edge> &bridge);
+
+	/// Function to relax on edge [u,v]
+	void Relax(int u, int v, int wt);
 
 	/// Utility functions for path-finding between two vertices
 	int countPathsUtil(int u, int v);
@@ -268,6 +286,31 @@ void GraphAL::DFSUtil2(int u, int& time, vector<int>& dfs)
 	}
 }
 
+bool GraphAL::IsCyclic() 
+{
+	//reset all vertices
+	for(int u = 0; u < V; ++u) {
+		vs[u].tag = 'w'; vs[u].parent = -1; vs[u].d = vs[u].f = 0;
+	}
+
+	for(int u = 0; u < V; ++u) {
+		if(vs[u].tag == 'w' && IsCyclicUtil(u)) return true; //only process white vertices
+	}
+	return false;
+}
+
+bool GraphAL::IsCyclicUtil(int u) 
+{
+	vs[u].tag = 'g';
+	for(list<AdjElem>::const_iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
+		int v = it->vidx;
+		if(vs[v].tag == 'w' && IsCyclicUtil(v)) return true;
+		else if(vs[v].tag == 'g') return true;
+	}
+	vs[u].tag = 'b';
+	return false;
+}
+
 vector<int> GraphAL::TopoSort() 
 {
 	for(int v = 0; v < V; ++v) vs[v].tag = 'w';
@@ -293,7 +336,7 @@ void GraphAL::TopoSortUtil(int v, vector<int>& ts)
 	ts.insert(ts.begin(), v); //insert at head (stack)
 }
 
-vector<vector<int> > GraphAL::findSCC()
+vector<vector<int> > GraphAL::SCC()
 {
 	vector<vector<int> > scc;
 	for(int v = 0; v < V; ++v) vs[v].tag = 'w';
@@ -464,6 +507,58 @@ vector<Edge> GraphAL::MSTPrim()
 		}
 	}
 	return MSTedges;
+}
+
+bool GraphAL::BellmanFord(int src) {
+	for(int v = 0; v < V; ++v) {
+		vs[v].dist = INT_MAX; vs[v].parent = -1;
+	}
+	vs[src].dist = 0;
+
+	for(int i = 0; i < V-1; ++i) { //perform global relaxation for V-1 times
+		for(int u = 0; u < V; ++u) {	//relax each edge in G	
+			for(list<AdjElem>::const_iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
+				Relax(u, it->vidx, it->weight);
+			}
+		}
+	}
+
+	//check negative cycles
+	for(int u = 0; u < V; ++u) {	//relax each edge in G	
+		for(list<AdjElem>::const_iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
+			int v = it->vidx;
+			if(vs[v].dist > vs[u].dist + it->weight) return false;
+		}
+	}
+
+	return true;
+}
+
+void GraphAL::SPdag(int src) {
+	assert(!IsCyclic());
+	for(int v = 0; v < V; ++v) {
+		vs[v].dist = INT_MAX; vs[v].parent = -1;
+	}
+	vs[src].dist = 0;
+
+	//topological sort order
+	vector<int> ts = TopoSort();
+
+	for(unsigned k = 0; k < ts.size(); ++k) { //relax edge in topological order
+		int u = ts[k];
+		for(list<AdjElem>::const_iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
+			Relax(u, it->vidx, it->weight);
+		}
+	}
+}
+
+void GraphAL::Relax(int u, int v, int wt) {
+	// only update when there exist a shorter path to v via u
+	// need to check u's dist value to avoid integer overflow. If vs[u].dist = inf, no need to relax
+	if(vs[u].dist != INT_MAX && vs[v].dist > vs[u].dist + wt) {
+		vs[v].dist = vs[u].dist + wt;
+		vs[v].parent = u;
+	}
 }
 
 vector<vector<int> > GraphAL::findPaths(int u, int v) {
