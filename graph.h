@@ -681,42 +681,49 @@ public:
 		if(type == UNDIRECTED) adj[j][i] = w;
 	}
 
-	///All pair shorted paths algorithm by extending one edge at a time
-	vector<vector<int> > AllPairsSPSlow();
+	/// All-pairs shortest paths algorithm by extending one edge at a time
+	void AllPairsSPSlow();
 
-	///All pair shorted paths algorithm by utilizing associativity of "multiplication" and "saturation property",
+	/// All-pairs shortest paths algorithm by utilizing associativity of "multiplication" and "saturation property",
 	///i.e. L(n) = L(n+1) = ...
-	vector<vector<int> > AllPairsSPFast();
+	void AllPairsSPFast();
+
+	/// Floyd-Warshall all-pairs shorted paths algorithm
+	void AllPairsSPFW();
+
+	// Print shortest-path weight and predecessor matrix
+	void printSPWT() { cout << spwt;}
+	void printSPPR() { cout << sppr;}
 
 	friend ostream& operator<<(ostream& os, const GraphAM& g) { os << g.adj; return os;}
 
 protected:
 	GraphType type;
 	int V;
-	vector<vector<int> > adj;
+	vector<vector<int> > adj; //adjacency matrix
+	vector<vector<int> > spwt; //all-pairs shortest path weight matrix
+	vector<vector<int> > sppr; //all-pairs shortest path predecessor matrix
 
 private:
-	///Utility function to extend shorted path by "multiplying" two matrices
+	/// Utility function to extend shorted path by "multiplying" two matrices
 	vector<vector<int> > ExtendSP(vector<vector<int> >& L, vector<vector<int> >& W);
 };
 
-vector<vector<int> > GraphAM::AllPairsSPSlow() {
+void GraphAM::AllPairsSPSlow() {
 	int n = adj.size();
-	vector<vector<int> > apsp = adj;
+	spwt = adj;
 	for(int k = 0; k < n-2; ++k) { //calculate pow(adj, n-1)
-		apsp = ExtendSP(apsp, adj);
+		spwt = ExtendSP(spwt, adj);
 	}
-	return apsp;
 }
 
-vector<vector<int> > GraphAM::AllPairsSPFast() {
+void GraphAM::AllPairsSPFast() {
 	int n = adj.size(), m = 1;
-	vector<vector<int> > apsp = adj;
+	spwt = adj;
 	while(m < n-1) { //calculate pow(adj, n-1)
-		apsp = ExtendSP(apsp, apsp);
+		spwt = ExtendSP(spwt, spwt);
 		m = 2*m;
 	}
-	return apsp;
 }
 
 vector<vector<int> > GraphAM::ExtendSP(vector<vector<int> >& L, vector<vector<int> >& W) {
@@ -731,6 +738,34 @@ vector<vector<int> > GraphAM::ExtendSP(vector<vector<int> >& L, vector<vector<in
 		}
 	}
 	return ret;
+}
+
+void GraphAM::AllPairsSPFW() {
+	int n = adj.size();
+	//find the path with intermediate indices from set (0 .. k-1) of k elements, begins at k = 0 (adj), and ends at k = n;
+	spwt = adj; //k=0 case
+	sppr.resize(n, vector<int>(n, -1));
+	//construct sppr[i][j] for k=0 from adj. predecessor of j in shorted path between i and j
+	for(int i = 0; i < n; ++i) {
+		for(int j = 0; j < n; ++j) {
+			if(i == j || adj[i][j] == INT_MAX) sppr[i][j] = -1;
+			else sppr[i][j] = i; 
+		}
+	}
+	vector<vector<int> > spwt_old, sppr_old;
+	for(int k = 0; k < n; ++k) { //add vertex v[k] to intermediate points of shorted-paths between i and j?
+		spwt_old = spwt; 
+		sppr_old = sppr;
+		for(int i = 0; i < n; ++i) {
+			for(int j = 0; j < n; ++j) {
+				int val = (spwt_old[i][k] == INT_MAX || spwt_old[k][j] == INT_MAX) ? INT_MAX : spwt_old[i][k] + spwt_old[k][j];
+				if(val < spwt_old[i][j]) {
+					spwt[i][j] = val; 	//update weight
+					sppr[i][j] = sppr_old[k][j]; //update predecessor
+				}
+			}
+		}
+	}
 }
 
 #endif
