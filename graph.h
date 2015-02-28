@@ -107,6 +107,9 @@ public:
 	/// Algorithm for the Single-source shortest path in directed acyclic grpahs in O(V+E)
 	void SPdag(int src);
 
+	/// Dijkstra's algorithm for the single-source shorted-path problem on graph without negative edges
+	void Dijkstra(int src);
+
 	/// Count number of paths from vertex u to v (using depth-first search)
 	int countPaths(int u, int v) { return countPathsUtil(u, v); }
 
@@ -474,23 +477,23 @@ vector<Edge> GraphAL::MSTPrim()
 {
 	assert(type == UNDIRECTED);
 	for(int u = 0; u < V; ++u) {
-		vs[u].d = INT_MAX; vs[u].parent = -1; vs[u].tag = 'w';
+		vs[u].dist = INT_MAX; vs[u].parent = -1; vs[u].tag = 'w';
 	}
-	vs[0].d = 0;
-	for(int t = 0; t < V-1; ++t) { //do it V-1 times
+	vs[0].dist = 0;
+	for(int t = 0; t < V; ++t) { //do V times (first time just pick 0)
 		//find the one with smallest distance
 		int u = 0, mind = INT_MAX;
 		for(int k = 0; k < V; ++k) {
-			if(vs[k].tag == 'w' && vs[k].d < mind) {
-				mind = vs[k].d; u = k; 
+			if(vs[k].tag == 'w' && vs[k].dist < mind) {
+				mind = vs[k].dist; u = k; 
 			}
 		}
 		vs[u].tag = 'b'; //u is part of MST, mark as black
 		//only update unselected (white) neighbors
 		for(list<AdjElem>::const_iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
 			int v = it->vidx;
-			if(vs[v].tag == 'w' && vs[v].d > it->weight) { 
-				vs[v].d = it->weight; vs[v].parent = u;
+			if(vs[v].tag == 'w' && vs[v].dist > it->weight) { 
+				vs[v].dist = it->weight; vs[v].parent = u;
 			}
 		}
 	}
@@ -548,6 +551,29 @@ void GraphAL::SPdag(int src) {
 		int u = ts[k];
 		for(list<AdjElem>::const_iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
 			Relax(u, it->vidx, it->weight);
+		}
+	}
+}
+
+void GraphAL::Dijkstra(int src) {
+	for(int v = 0; v < V; ++v) {
+		vs[v].dist = INT_MAX; vs[v].parent = -1;
+	}
+	vs[src].dist = 0;
+
+	for(int t = 0; t < V; ++t) { //do V times (first time just pick src)
+		//find the one with smallest distance
+		int u = 0, mind = INT_MAX;
+		for(int k = 0; k < V; ++k) {
+			if(vs[k].tag == 'w' && vs[k].dist < mind) {
+				mind = vs[k].dist; u = k; 
+			}
+		}
+		vs[u].tag = 'b'; //u is part of shorted-path tree, mark as black
+		//only update unselected (white) neighbors
+		for(list<AdjElem>::const_iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
+			int v = it->vidx;
+			Relax(u, v, it->weight);
 		}
 	}
 }
