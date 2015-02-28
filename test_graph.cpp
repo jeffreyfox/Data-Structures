@@ -236,4 +236,14 @@ void testGraph(int argc, char* argv[])
 	gu.printSPWT();
 	cout << "Shorted path predecessor matrix is : " << endl;
 	gu.printSPPR();
+	
+	GraphAL ggg(4);
+	ggg.addEdge(0,1);ggg.addEdge(0,2);ggg.addEdge(0,3);
+	ggg.addEdge(1,3);ggg.addEdge(2,3);ggg.addEdge(1,2);
+
+	int i = 0, j = 3;
+	
+	cout << "Number of paths between " << i << " and " << j << " is " << ggg.CountPaths(i, j) << endl;
+	vector<vector<int> > paths = ggg.FindPaths(i, j);
+	cout << paths << endl;	
 }
