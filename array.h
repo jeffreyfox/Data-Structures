@@ -126,6 +126,7 @@ namespace ArrayLib {
 		return i+1;
 	}
 
+	/// 2-color sort followed by tagging positive as negative
 	int firstMissingPositive3(vector<int>& num) {
 		//first segregate non-positive numbers to back (2-color sort)
 		int lo(0), hi(n-1);
