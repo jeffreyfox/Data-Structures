@@ -43,6 +43,30 @@ namespace ArrayLib {
 		return max(max_not_ending_here, max_ending_here);
 	}
 
+	/// Find the index of the ceiling of x in num (linear search)
+	int ceiling1(const vector<int>& num, int x) {
+		unsigned i = 0;
+		while(i < num.size() && num[i] < x) i++;
+		if(i == num.size()) return -1;
+		else return i; //i is the first element >= x
+	}
+
+	/// Find the index of the ceiling of x in num (binary search)
+	int ceiling2(const vector<int>& num, int x) {
+		//[0, lo-1] < x
+		//[hi+1, n] >= x
+		//[lo, hi] undetermined
+		int n = num.size();
+		if(x > num.back()) return -1;
+		int lo(0), hi(n-1), mid(0);
+		while(lo <= hi) {
+			mid = lo + (hi-lo)/2;
+			if(num[mid] < x) lo = mid+1;
+			else hi = mid-1;
+		}
+		return lo; //here lo = hi+1
+	}
+
 	/// Swap
 	void swap(int &a, int &b) {
 		int t = a; a = b; b = t;
@@ -71,7 +95,7 @@ namespace ArrayLib {
 	}
 
 	/// Left rotation of array (using temporary array)
-	void LeftRotate1(vector<int>& num, int d) {
+	void leftRotate1(vector<int>& num, int d) {
 		if(num.empty()) return;
 		int n = num.size();
 		d = d % n;
@@ -82,7 +106,7 @@ namespace ArrayLib {
 	}
 
 	/// Left rotation of array (rotate one at a time)
-	void LeftRotate2(vector<int>& num, int d) {
+	void leftRotate2(vector<int>& num, int d) {
 		if(num.empty()) return;
 		int n = num.size();
 		d = d % n;
@@ -96,7 +120,7 @@ namespace ArrayLib {
 	}
 
 	/// Left rotation of array (juggling algorithm)
-	void LeftRotate3(vector<int>& num, int d) {
+	void leftRotate3(vector<int>& num, int d) {
 		if(num.empty()) return;
 		int n = num.size();
 		d = d % n;
@@ -116,7 +140,7 @@ namespace ArrayLib {
 	}
 
 	/// Left rotation of array (revesal algorithm)
-	void LeftRotate4(vector<int>& num, int d) {
+	void leftRotate4(vector<int>& num, int d) {
 		if(num.empty()) return;
 		int n = num.size();
 		d = d % n;
@@ -126,27 +150,27 @@ namespace ArrayLib {
 		reverse(num, n-d, n);
 	}
 
-	void LeftRotateUtil(vector<int>& num, int beg, int end, int d);
+	void leftRotateUtil(vector<int>& num, int beg, int end, int d);
 
 	/// Left rotation of array (block swap algorithm)
-	void LeftRotate5(vector<int>& num, int d) {
+	void leftRotate5(vector<int>& num, int d) {
 		if(num.empty()) return;
 		int n = num.size();
 		d = d % n;
 		if(d == 0) return;
-		LeftRotateUtil(num, 0, n, d);
+		leftRotateUtil(num, 0, n, d);
 	}
 
 	/// Utility function to rotate num's subarray [beg, end) to the left by d
-	void LeftRotateUtil(vector<int>& num, int beg, int end, int d) {
+	void leftRotateUtil(vector<int>& num, int beg, int end, int d) {
 		int n = end-beg;
 		if(d == n-d) swap(num, beg, beg+d, d); //we are done!
 		else if(d < n-d) { //left side shorter
 			swap(num, beg, end-d, d);
-			LeftRotateUtil(num, beg, end-d, d);
+			leftRotateUtil(num, beg, end-d, d);
 		} else {
 			swap(num, beg, beg+d, n-d);
-			LeftRotateUtil(num, end-d, end, d-(n-d));
+			leftRotateUtil(num, end-d, end, d-(n-d));
 		}
 	}
 }
