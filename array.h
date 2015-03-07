@@ -67,6 +67,30 @@ namespace ArrayLib {
 		return lo; //here lo = hi+1
 	}
 
+	struct pair {
+		int min;
+		int max;
+		pair(): min(0), max(0) {}
+		pair(int mn, int mx) : min(mn), max(mx) {}
+	};
+
+	struct pair minMax(const vector<int>& num) {
+		int n = num.size();
+		assert(n >= 0);
+		if(n == 1) return pair(num[0], num[0]);
+		int min(0), max(0), tmin(0), tmax(0);
+		if(num[0] > num[1]) { max = num[0]; min = num[1]; }
+		else { min = num[0]; max = num[1]; }
+		int j;
+		for(j = 2; j+1 < n; j += 2) {
+			if(num[j] > num[j+1]) { tmax = num[j]; tmin = num[j+1]; }
+			else { tmin = num[j]; tmax = num[j+1]; }
+			if(tmax > max) max = tmax;
+			if(tmin < min) min = tmin;
+		}
+		return pair(min, max);
+	}
+
 	/// Swap
 	void swap(int &a, int &b) {
 		int t = a; a = b; b = t;
