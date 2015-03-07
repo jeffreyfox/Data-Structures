@@ -15,7 +15,7 @@ void testArray(int argc, char* argv[])
 	for(unsigned k = 0; k < arr.size(); ++k) arr[k] = k+1;
 	for(unsigned  k = 0; k < arr.size(); ++k) cout << arr[k] << " ";
 	cout << endl;
-	LeftRotate5(arr, 3);
+	leftRotate5(arr, 3);
 	for(unsigned  k = 0; k < arr.size(); ++k) cout << arr[k] << " ";
 	cout << endl;
 
