@@ -10,4 +10,12 @@ void testArray(int argc, char* argv[])
 	cout << "max-subarray (not allowing empty) is " << maxSubArray2(b, 8) << endl;
 	int c[5] = {3, 2, 5, 10, 7};
 	cout << "max-subarray (non-consecutive) is " << maxSubArray3(c, sizeof(c)/sizeof(int)) << endl;
+
+	vector<int> arr(8);
+	for(unsigned k = 0; k < arr.size(); ++k) arr[k] = k+1;
+	for(unsigned  k = 0; k < arr.size(); ++k) cout << arr[k] << " ";
+	cout << endl;
+	LeftRotate5(arr, 3);
+	for(unsigned  k = 0; k < arr.size(); ++k) cout << arr[k] << " ";
+	cout << endl;
 }
