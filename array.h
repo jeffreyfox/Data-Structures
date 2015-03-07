@@ -91,6 +91,61 @@ namespace ArrayLib {
 		return pair(min, max);
 	}
 
+	/// Find the smallest positive number missing from the array in O(n) time using constant extra space
+	int firstMissingPositive(vector<int>& num) {
+		int n = num.size();
+		int i, j;
+		//for all k >= 0, num[k] should contain k+1;
+		for(i = 0; i < n; ++i) {
+			while(num[i] >= 1 && num[i] <= n && num[i] != i+1) {
+				j = num[i]-1; //destination index
+				if(num[i] != num[j]) swap(num[i], num[j]); 
+				else break; //need this to avoid infinite loop! e.g [1,1]
+			}
+		}
+		for(i = 0; i < n; ++i) 
+			if(num[i] != i+1) return i+1;
+		return i+1;
+	}
+
+	/// Slightly different form	
+	int firstMissingPositive2(vector<int>& num) {
+		int n = num.size();
+		int i(0), j(0), toFill(-1);
+		for(; i < n; ++i) {
+			toFill = -1;
+			j = i; 
+			while(j >= 0 && j < n && num[j] != j+1) {
+				swap(toFill, num[j]);
+				j = toFill-1; //destination of toFill value
+			}
+		}
+
+		for(i = 0; i < n; ++i)
+			if(num[i] != i+1) return i+1;
+		return i+1;
+	}
+
+	int firstMissingPositive3(vector<int>& num) {
+		//first segregate non-positive numbers to back (2-color sort)
+		int lo(0), hi(n-1);
+		while(lo <= hi) {
+			if(A[lo] > 0) lo++;
+			else swap(A[lo], A[hi--]);
+		}
+		int i(0), j(0);
+		//now hi is the end of positive numbers, lo is start of negative numbers
+		//if found one integer, mark corresponding entry to negative
+		for(i = 0; i < lo; ++i) {
+			int j = abs(A[i]) -1; // j is always positive
+			if(j < lo && A[j] > 0)  A[j] = -A[j];
+		}
+		//the first positive number is the one
+		for(i = 0; i < lo; ++i) 
+			if(A[i] > 0) return i+1;
+		return i+1;  
+	}
+
 	/// Swap
 	void swap(int &a, int &b) {
 		int t = a; a = b; b = t;
