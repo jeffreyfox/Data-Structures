@@ -18,4 +18,11 @@ void testArray(int argc, char* argv[])
 	LeftRotate5(arr, 3);
 	for(unsigned  k = 0; k < arr.size(); ++k) cout << arr[k] << " ";
 	cout << endl;
+
+	int d[] = {1, 2, 8, 10, 10, 12, 19};
+	int x = 0;
+	vector<int> dd(d, d+sizeof(d)/sizeof(int));
+	int ceil_idx = ceiling2(dd, x);
+	if(ceil_idx >= 0) cout << "celing of " << x << " in array d = " << dd[ceil_idx] << endl;
+	else cout << "celing of " << x << " in array d does not exist!" << endl;
 }
