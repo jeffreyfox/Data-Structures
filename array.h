@@ -128,22 +128,23 @@ namespace ArrayLib {
 
 	/// 2-color sort followed by tagging positive as negative
 	int firstMissingPositive3(vector<int>& num) {
+		int n = num.size();
 		//first segregate non-positive numbers to back (2-color sort)
 		int lo(0), hi(n-1);
 		while(lo <= hi) {
-			if(A[lo] > 0) lo++;
-			else swap(A[lo], A[hi--]);
+			if(num[lo] > 0) lo++;
+			else swap(num[lo], num[hi--]);
 		}
 		int i(0), j(0);
 		//now hi is the end of positive numbers, lo is start of negative numbers
 		//if found one integer, mark corresponding entry to negative
 		for(i = 0; i < lo; ++i) {
-			int j = abs(A[i]) -1; // j is always positive
-			if(j < lo && A[j] > 0)  A[j] = -A[j];
+			int j = abs(num[i]) -1; // j is always positive
+			if(j < lo && num[j] > 0)  num[j] = -num[j];
 		}
 		//the first positive number is the one
 		for(i = 0; i < lo; ++i) 
-			if(A[i] > 0) return i+1;
+			if(num[i] > 0) return i+1;
 		return i+1;  
 	}
 
