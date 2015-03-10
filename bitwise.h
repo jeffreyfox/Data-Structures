@@ -116,7 +116,31 @@ namespace BitLib {
 		// Clear i through j, then put m in there
 		return (n & maskn) | (m & maskm) << i;
 	}
+	
+	int rightMostSet(int x) {
+		unsigned y = x & (~x+1);
+		int pos = -1;
+		while(y) {
+			y >>= 1;
+			pos++;
+		}
+		return pos;
+	}
 
+	int nextHigher(int x) {
+		if(x <= 0) return -1;
+		int n = rightMostSet(x);
+		int m = rightMostSet(~(x >> n)) + n;
+		x |= 1 << m;  //set d(m)
+		x &= ~(1 << m-1); //unset d(m-1)
+		int len = m-n-1;
+		if(len > 0) {
+			x &= ~((1 << len) - 1 << n);
+			x |= (1 << len) - 1;
+		}
+		return x < 0 ? -1 : x;
+	}
+	
 	unsigned int reverseBits(unsigned n) {
 		unsigned int lo = 0x00000001, hi = 0x80000000, XOR = 0;
 		int d = 31;
