@@ -58,19 +58,6 @@ namespace BitLib {
 		return count;
 	}
 
-	unsigned findHigher(unsigned x) {
-		unsigned n = 1;
-		while(!(x & n)) n = n << 1;
-		unsigned m = n;
-		unsigned y = x+n;
-		while(! (y & m)) m = m<<1;
-		unsigned pm(0), pn(0);
-		while(n) {
-			pn ++; n = n >> 1;	
-		} 
-		return y | ((x & (m-1)) >> pn);
-	}
-
 	bool isPowerOfTwo(unsigned int x) {
 		return x && !(x & (x-1));
 	}
@@ -116,7 +103,7 @@ namespace BitLib {
 		// Clear i through j, then put m in there
 		return (n & maskn) | (m & maskm) << i;
 	}
-	
+
 	int rightMostSet(int x) {
 		unsigned y = x & (~x+1);
 		int pos = -1;
@@ -129,18 +116,40 @@ namespace BitLib {
 
 	int nextHigher(int x) {
 		if(x <= 0) return -1;
-		int n = rightMostSet(x);
-		int m = rightMostSet(~(x >> n)) + n;
-		x |= 1 << m;  //set d(m)
+		int n = rightMostSet(x);//first 1
+		int m = rightMostSet(~(x >> n)) + n; //first 0 after 1
+		x |= (1 << m);  //set d(m)
 		x &= ~(1 << m-1); //unset d(m-1)
-		int len = m-n-1;
+		int len = m-n-1, mask = (1 << len) - 1;
 		if(len > 0) {
-			x &= ~((1 << len) - 1 << n);
-			x |= (1 << len) - 1;
+			x &= ~(mask << n); //turn off len ones after d(m-1)
+			x |= mask; //turn on len zeros from lowest
 		}
 		return x < 0 ? -1 : x;
 	}
-	
+
+	int nextHigher2(int x) {
+		int n = x & (~x + 1); //rightmost set bit
+		int y = x + n; // 01111000 => 10000000
+		int pn = 0; //position of the set bit in n
+		while(n) { 	pn ++; n = n >> 1;	} 
+		return y | ((x & (y-1)) >> pn);
+	}
+
+	int nextLower(int x) {
+		if(x <= 0) return -1;
+		int n = rightMostSet(~x); //first 0
+		int m = rightMostSet(x >> n) + n; //first 1 after 0
+		x &= ~(1 << m);  //unset d(m)
+		x |= (1 << m-1); //set d(m-1)
+		int len = n, mask = (1 << len) - 1;
+		if(len > 0) {
+			x &= ~mask; //turn off len zeros from lowest
+			x |= (mask << m-n-1);//turn on len ones after d(m-1)
+		}
+		return x < 0 ? -1 : x;
+	}
+
 	unsigned int reverseBits(unsigned n) {
 		unsigned int lo = 0x00000001, hi = 0x80000000, XOR = 0;
 		int d = 31;
