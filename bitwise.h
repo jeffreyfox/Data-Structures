@@ -36,7 +36,7 @@ namespace BitLib {
 
 	/// Swap two nibbles in a 1-byte char
 	unsigned char swapNibbles(unsigned char x) { return (x & 0xF0) >> 4 | (x & 0x0F) << 4; }
-	
+
 	/// Reverse all bits in an integer
 	unsigned int reverseBits(int n) {
 		unsigned int lo = 0x00000001, hi = 0x80000000, XOR = 0;
@@ -50,7 +50,7 @@ namespace BitLib {
 		}
 		return n;
 	}
-	
+
 	/// Check if integer is power of 2
 	bool isPowerOfTwo(unsigned int x) { return x && !(x & (x-1)); }
 
@@ -75,7 +75,7 @@ namespace BitLib {
 		}
 		return count;
 	}
-	
+
 	/// Return an integer whose bits i to j are 1 and 0 otherwise
 	unsigned setBits(unsigned i, unsigned j) {
 		int left = (j+1 == 32) ? ~0 : ((1 << j+1) -1); // 0s thru j+1, and 1s from j to 0
@@ -117,7 +117,7 @@ namespace BitLib {
 		// Clear i through j, then put m in there
 		return (n & maskn) | (m & maskm) << i;
 	}
-	
+
 	/// Find the position (0-31) of the right most set bit of an integer
 	int rightmostSetPos(int x) {
 		unsigned y = x & (~x+1);
@@ -143,7 +143,7 @@ namespace BitLib {
 		}
 		return x < 0 ? -1 : x;
 	}
-	
+
 	/// Find the next higher integer than x with same number of set bits
 	int nextHigher2(int x) {
 		int n = x & (~x + 1); //rightmost set bit
@@ -152,7 +152,7 @@ namespace BitLib {
 		while(n) { 	pn ++; n = n >> 1;	} 
 		return y | ((x & (y-1)) >> pn);
 	}
-	
+
 	/// Find the next lower integer than x with same number of set bits
 	int nextLower(int x) {
 		if(x <= 0) return -1;
@@ -166,6 +166,20 @@ namespace BitLib {
 			x |= (mask << m-n-1);//turn on len ones after d(m-1)
 		}
 		return x < 0 ? -1 : x;
+	}
+	
+	/// Find the only number that appears once in an array while others appear t times (t >= 2)
+	int singleNumber(int A[], int n, int t) {
+		//count[k] stores whether '1' has appeared k+1 times.
+		vector<int> count(t, 0); 
+		for(int k = 0; k < n; ++k) {
+			count[t-1] = count[t-2] & A[k];
+			for(int d = t-2; d > 0; --d) 
+				count[d] = (count[d] | count[d-1] & A[k]) & (~count[t-1]);
+			count[0] = (count[0] | A[k]) & (~count[t-1]);
+			count[t-1] = 0; //reset
+		}
+		return count[0];
 	}
 };
 
