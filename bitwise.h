@@ -77,7 +77,7 @@ namespace BitLib {
 
 	/// Return an integer whose bits i to j are 1 and 0 otherwise
 	unsigned setBits(unsigned i, unsigned j) {
-		int left = (j == 31) ? ~0 : ((1 << j+1) -1); // 0s thru j+1, and 1s from j to 0
+		int left = (j+1 == 32) ? ~0 : ((1 << j+1) -1); // 0s thru j+1, and 1s from j to 0
 		int right = (1 << i) -1; // 0s thru i, and 1s from i-1 to 0  
 		return left ^ right; //1s from i to j, and 0 otherwise
 	}
@@ -87,6 +87,34 @@ namespace BitLib {
 		int left = (j == 31) ? 0 : (~((1<< j+1) - 1));  //1s thru j+1, and 0s from j to 0
 		int right = (1 << i)-1; // 0s thru i, and 1s from i-1 to 0 
 		return ~(left | right); //1s from i to j, and 0 otherwise
+	}
+
+	//update n's bits i to j by m, solution in careercup (wrong)
+	int updateBits(int n, int m, int i, int j) {
+		int max = ~0; /* All 1's */
+		// 1's through position j, then 0's
+		int left = max - ((1 << j) - 1);
+		// 1's after position i
+		int right = ((1 << i) - 1);
+		// 1's, with 0s between i and j
+		int mask = left | right;
+		// Clear i through j, then put m in there
+		return (n & mask) | (m << i);
+	}
+
+	//update n's bits i to j by m, my solution
+	int updateBits2(int n, int m, int i, int j) {
+		assert(0 <= i && i <= j && j <= 31); 
+		// 1's through position j+1, then 0's
+		int left = (j+1 == 32) ? 0 : ~((1 << j+1) - 1);
+		// 1's after position i
+		int right = ((1 << i) - 1);
+		// 1's, with 0s between i and j
+		int maskn = left | right;
+		//1's after position j-i+1
+		int maskm = (1 << j-i) - 1;
+		// Clear i through j, then put m in there
+		return (n & maskn) | (m & maskm) << i;
 	}
 
 	unsigned int reverseBits(unsigned n) {
