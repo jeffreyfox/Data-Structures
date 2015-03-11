@@ -112,8 +112,9 @@ namespace BitLib {
 		int right = ((1 << i) - 1);
 		// 1's, with 0s between i and j
 		int maskn = left | right;
+		int len = j-i+1;
 		//1's after position j-i+1
-		int maskm = (1 << j-i) - 1;
+		int maskm = (len == 32) ? ~0 : (1 << len) - 1;
 		// Clear i through j, then put m in there
 		return (n & maskn) | (m & maskm) << i;
 	}
