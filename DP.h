@@ -162,11 +162,8 @@ public:
 			}
 	}
 
-	///  O(n*log n) method, using binary search
-	void solve2();
-
-	///  Variant of O(n*log n) method, using binary search
-	void solve3() {
+	/// O(n*log n) method, using binary search
+	void solve2() {
 		vector<int> p(n, -1); //p[i]: num[i]'s predecessor in the LIS of num[0..i] ending at num[i] (i = 0 .. n-1)
 		vector<int> c(n+1, -1); //c[i]: the minimum possible ending value of LIS of length i (i = 0 .. n)
 		int L = 0; //length of longest LIS found so far (bound of c array)
