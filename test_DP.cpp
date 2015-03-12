@@ -1,6 +1,37 @@
 #include "DP.h"
 
-void testDP(int argc, char* argv[])
+void testLIS(int argc, char* argv[])
+{
+	int n = 20, sw = 1, m = 20, seed = 20;
+	vector<int> num(n, 0);
+	if(sw) {
+		srand(seed);
+		for(int i = 0; i < n; ++i) num[i] = m*1.0*rand()/RAND_MAX;
+	} else {
+		int i = 0;
+		while(i < n && cin >> num[i++]);
+	}
+
+	cout << num << endl;
+	
+	LIS lis0(num), lis1(num);
+	
+	lis0.solve0();
+	lis1.solve1();
+	
+	int l(0);
+	vector<int> ret;
+
+	l = lis0.getLISlen();
+	ret = lis0.getLISvec();
+	cout << "LIS length = " << l << " " << ret << endl;
+
+	l = lis1.getLISlen();
+	ret = lis1.getLISvec();
+	cout << "LIS length = " << l << " " << ret << endl;
+}
+
+void testLCS(int argc, char* argv[])
 {
 	//string x = "abcbdab", y = "bdcaba";
 	string x = "10010101", y = "010110110";
