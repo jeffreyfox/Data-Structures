@@ -2,7 +2,7 @@
 
 void testLIS(int argc, char* argv[])
 {
-	int n = 20, sw = 1, m = 20, seed = 20;
+	int n = 7, sw = 0, m = 20, seed = 200;
 	vector<int> num(n, 0);
 	if(sw) {
 		srand(seed);
@@ -14,10 +14,11 @@ void testLIS(int argc, char* argv[])
 
 	cout << num << endl;
 	
-	LIS lis0(num), lis1(num);
+	LIS lis0(num), lis1(num), lis3(num);
 	
 	lis0.solve0();
 	lis1.solve1();
+	lis3.solve3();
 	
 	int l(0);
 	vector<int> ret;
@@ -28,6 +29,10 @@ void testLIS(int argc, char* argv[])
 
 	l = lis1.getLISlen();
 	ret = lis1.getLISvec();
+	cout << "LIS length = " << l << " " << ret << endl;
+
+	l = lis3.getLISlen();
+	ret = lis3.getLISvec();
 	cout << "LIS length = " << l << " " << ret << endl;
 }
 
