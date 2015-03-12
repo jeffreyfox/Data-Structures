@@ -166,7 +166,35 @@ public:
 	void solve2();
 
 	///  Variant of O(n*log n) method, using binary search
-	void solve3();
+	void solve3() {
+		vector<int> p(n, -1); //p[i]: num[i]'s predecessor in the LIS of num[0..i] ending at num[i] (i = 0 .. n-1)
+		vector<int> c(n+1, -1); //c[i]: the minimum possible ending value of LIS of length i (i = 0 .. n)
+		int L = 0; //length of longest LIS found so far (bound of c array)
+		int i, j, k;
+		for(i = 0; i < n; ++i) {
+			//since num[c[k]] is sorted, use binary search to find the first k such that num[c[k]] > num[i]
+			//invariant: those below lo are <= num[i], those above hi are > num[i]
+			//ends when lo = hi+1, thus lo is what we want
+			int lo = 1, hi = L, mid = 0; //upper bound is c[L], beyong this point is undefined
+			while(lo <= hi) {
+				mid = lo + (hi-lo)/2;
+				if(num[c[mid]] <= num[i]) lo = mid+1;
+				else hi = mid-1;
+			}
+			k = lo;
+			if(k > L) L = k; //lo = L+1 actually, extend LIS
+			c[k] = i; //update the min-val of LIS of length k to num[i]
+			//when k = 1, p[i] is first element of LIS, c[0] = -1, OK.
+			p[i] = c[k-1]; //Use LIS of length k-1 plus num[i] as the new LIS of length k;
+		}
+		LISlen = L; //get the length of LIS
+		//reconstruct
+		j = c[L];
+		while(j != -1) {
+			LISvec.insert(LISvec.begin(), num[j]);
+			j = p[j];
+		}
+	}
 
 private:
 	vector<int> num; //number array
