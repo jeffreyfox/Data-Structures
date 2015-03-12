@@ -14,11 +14,11 @@ void testLIS(int argc, char* argv[])
 
 	cout << num << endl;
 	
-	LIS lis0(num), lis1(num), lis3(num);
+	LIS lis0(num), lis1(num), lis2(num);
 	
 	lis0.solve0();
 	lis1.solve1();
-	lis3.solve3();
+	lis2.solve2();
 	
 	int l(0);
 	vector<int> ret;
@@ -31,8 +31,8 @@ void testLIS(int argc, char* argv[])
 	ret = lis1.getLISvec();
 	cout << "LIS length = " << l << " " << ret << endl;
 
-	l = lis3.getLISlen();
-	ret = lis3.getLISvec();
+	l = lis2.getLISlen();
+	ret = lis2.getLISvec();
 	cout << "LIS length = " << l << " " << ret << endl;
 }
 
