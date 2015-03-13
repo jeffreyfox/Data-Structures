@@ -3,6 +3,7 @@
 #define DP_H
 
 #include <vector>
+#include <climits>
 
 using namespace std;
 
@@ -96,7 +97,7 @@ private:
 	vector<vector<int> > len; //lengths of LCS of xi and yj
 };
 
-/// Class to solve longest increasing subsequence problem (CLRS 15.5)
+/// Class to solve longest increasing subsequence problem (CLRS Ex 15.4-5, 15.4-6)
 /// solve function calculate LIS length and constructs the sequence using dynamic programming
 class LIS {
 public:
@@ -200,4 +201,69 @@ private:
 	vector<int> LISvec; //LIS vector
 };
 
+/// Class to solve optimal binary search trees problem(CLRS 15.5)
+
+class OptBST {
+public:
+
+	OptBST(int nn, const vector<double>& pp, const vector<double>& qq) : n(nn), p(pp), q(qq) {}
+
+	///O(n3) solution
+	void solve() {
+		//w[i][j]: total weight of keys ki .. kj-1, including dummy di .. dj, 0 <= i <= n;
+		//we need w[i][i], which is qi only, (i = 0 .. n)
+		w.resize(n+1, vector<double>(n+1, 0.0));
+		//c[i][j]: cost of optimum BST consisting of keys ki .. kj-1, including dummy di .. dj, 0 <=i <= n
+		c.resize(n+1, vector<double>(n+1, 1e20)); //initialized as a large value
+		//r[i][j]: root of optimum BST consisting of keys ki .. kj, 0 <=i <= j <= n-1
+		r.resize(n, vector<int>(n, -1));
+		int i, j, k, l;
+		for(i = 0; i <= n; ++i) w[i][i] = c[i][i] = q[i]; //only dummy keys
+		for(l = 1; l <= n; ++l) { //keys of length l
+			for(i = 0; i <= n-l; ++i) { // checking (ki .. kj-1), length = j-i = l
+				j = i+l;
+				w[i][j] = w[i][j-1] + p[j-1] + q[j]; //calculate w[i][j]
+				for(k = 0; k < n; ++k) { //try tree rooted at k
+					double tmp = c[i][k] + c[k+1][j] + w[i][j];
+					if(tmp < c[i][j]) { 
+						c[i][j] = tmp; r[i][j-1] = k;
+					}
+				}
+			}
+		}
+	}
+
+	void printTree() {
+		int root = r[0][n-1];
+		cout << "k" << root << " is the root " <<endl;
+		printTreeUtil(0, root, root);
+		printTreeUtil(root+1, n, root);
+		cout << endl;
+	}
+
+	//print out tree consistring keys ki .. kj-1, called by parent p
+	void printTreeUtil(int i, int j, int p) {
+		if(j <= i) {
+			if(p == j) cout << "d" << i << " is left child of k" << p << endl;
+			else cout << "d" << i << " is right child of k" << p << endl;
+		} else {
+			int root = r[i][j-1];
+			if(p == j) cout << "k" << root << " is left child of k" << p << endl;
+			else cout << "k" << root << " is right child of k" << p << endl;
+
+			printTreeUtil(i, root, root); //left is 0
+			printTreeUtil(root+1, j, root); //right is 1
+		}
+	}
+
+	vector<vector<double> > w; //total weight of keys ki .. kj-1, including dummy di .. dj;
+	vector<vector<double> > c; //cost of optimum BST consisting of keys ki .. kj-1, including dummy di .. dj
+	vector<vector<int> > r; //root of optimum BST consisting of keys ki .. kj
+
+private:
+
+	int n; //number of keys
+	vector<double> p; //probability of each key (size of n)
+	vector<double> q; //probability of dummy keys (size of n+1)
+};
 #endif
