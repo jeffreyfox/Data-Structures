@@ -209,7 +209,7 @@ public:
 	OptBST(int nn, const vector<double>& pp, const vector<double>& qq) : n(nn), p(pp), q(qq) {}
 
 	///O(n3) solution
-	void solve() {
+	void solve(int tag) {
 		//w[i][j]: total weight of keys ki .. kj-1, including dummy di .. dj, 0 <= i <= n;
 		//we need w[i][i], which is qi only, (i = 0 .. n)
 		w.resize(n+1, vector<double>(n+1, 0.0));
@@ -217,16 +217,29 @@ public:
 		c.resize(n+1, vector<double>(n+1, 1e20)); //initialized as a large value
 		//r[i][j]: root of optimum BST consisting of keys ki .. kj, 0 <=i <= j <= n-1
 		r.resize(n, vector<int>(n, -1));
-		int i, j, k, l;
+		int i, j, k, len;
 		for(i = 0; i <= n; ++i) w[i][i] = c[i][i] = q[i]; //only dummy keys
-		for(l = 1; l <= n; ++l) { //keys of length l
-			for(i = 0; i <= n-l; ++i) { // checking (ki .. kj-1), length = j-i = l
-				j = i+l;
+		for(len = 1; len <= n; ++len) { //keys of length len
+			for(i = 0; i <= n-len; ++i) { // checking (ki .. kj-1), length = j-i = len
+				j = i+len;
 				w[i][j] = w[i][j-1] + p[j-1] + q[j]; //calculate w[i][j]
-				for(k = 0; k < n; ++k) { //try tree rooted at k
-					double tmp = c[i][k] + c[k+1][j] + w[i][j];
-					if(tmp < c[i][j]) { 
-						c[i][j] = tmp; r[i][j-1] = k;
+
+				if(tag == 0) {
+					//O(n3) version
+					for(k = i; k < j; ++k) { //try tree rooted at k
+						double tmp = c[i][k] + c[k+1][j] + w[i][j];
+						if(tmp < c[i][j])  c[i][j] = tmp, r[i][j-1] = k;
+					}
+				} else {
+					//O(n2) version
+					if(len == 1) { //consider length = 1 separately
+						r[i][j-1] = i; 
+						c[i][j] = c[i][j-1] + c[i+1][j] + w[i][j];
+					} else{ //j>=i+2, i+1<=n-1,indexing no problem
+						for(k = r[i][j-2]; k <= r[i+1][j-1]; ++k) {
+							double tmp = c[i][k] + c[k+1][j] + w[i][j];
+							if(tmp < c[i][j]) c[i][j] = tmp, r[i][j-1] = k;
+						}
 					}
 				}
 			}
@@ -266,4 +279,5 @@ private:
 	vector<double> p; //probability of each key (size of n)
 	vector<double> q; //probability of dummy keys (size of n+1)
 };
+
 #endif
