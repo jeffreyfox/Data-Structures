@@ -73,10 +73,13 @@ void testOptBST(int argc, char* argv[])
 	double p[] = {0.15, 0.10, 0.05, 0.10, 0.20};
 	double q[] = {0.05, 0.10, 0.05, 0.05, 0.05, 0.10};
 	vector<double> pp(p, p+n), qq(q, q+n+1);
-	OptBST obst(n, pp, qq);
-	obst.solve();	
+	OptBST obst(n, pp, qq), obst1(n, pp, qq);
+	obst.solve(0);	obst1.solve(1);
 	cout << "cost of optimum BST is " << obst.c[0][n] << endl << endl;
 	obst.printTree();
+	
+	cout << "cost of optimum BST is " << obst1.c[0][n] << endl << endl;
+	obst1.printTree();
 
 	cout << "cost matrix is" << endl;
 	for(int k = 0; k < obst.c.size(); ++k) 
