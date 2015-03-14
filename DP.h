@@ -463,4 +463,34 @@ private:
 	int n, k;
 };
 
+class EggDrop {
+public:
+	EggDrop(int nn, int kk) : n(nn), k(kk) {}
+	int solve() {
+		c.resize(n+1, vector<int>(k+1, 0));//c[i][j]: minimum number of trials for i eggs on j floors
+		p.resize(n+1, vector<int>(k+1, 0));//p[i][j]: first trial floor for i eggs on j floors
+		int i, j, q;
+		for(j = 1; j <= k; ++j) c[1][j] = j; //worst case if only have one egg
+		for(i = 2; i <= n; ++i) { //have i eggs
+			for(j = 1; j <= k; ++j) { //have j floors (1 .. j)
+				c[i][j] = INT_MAX;
+				for(q = 1; q <= j; ++q) { //try dropping at q-th floor
+					//if breaking at q-th floor, then only need to check floors (1 .. q-1) with i-1 eggs
+					//if not breaking at q-th floor, then only need to check floors (q+1, j) with i eggs
+					int t = 1+max(c[i-1][q-1], c[i][j-q]);
+					if(t < c[i][j])  c[i][j] = t, p[i][j] = q;
+				}
+			}
+		}
+		return c[n][k];
+	}
+	int firstDrop() { return p[n][k];}
+
+private:
+	vector<vector<int> > c; //minimum number of trials 
+	vector<vector<int> > p; //position of first optimized drop
+	int n; //number of eggs
+	int k; // number of floors (0 .. k-1)
+};
+
 #endif
