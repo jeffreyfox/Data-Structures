@@ -141,3 +141,10 @@ void testEditDistance(int argc, char* argv[])
 	int d = ed.solve();
 	cout << "Edit of <" << x << "> and <" << y << "> is " << d << endl;
 }
+
+void testBinomialCoeff(int argc, char* argv[])
+{
+	int n = 8, k = 3;
+	BinomialCoeff bc(n, k);
+	cout << "C("<<n<<", "<<k<<") = "<<bc.solve()<<endl;
+}
