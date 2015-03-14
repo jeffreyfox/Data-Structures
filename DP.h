@@ -447,4 +447,20 @@ private:
 	vector<vector<int> > d; //edit distance between x and y's substrings
 };
 
+class BinomialCoeff {
+public:
+	BinomialCoeff(int nn, int kk) : n(nn), k (kk) {}
+	int solve() {
+		assert(n >= 0 && k >= 0 && n >= k);
+		vector<int> v(k+1, 0); //vector strong C(n,j) where j = 0 .. k
+		v[0] = v[1] = 1; //C(1,0) = C(1,1) = 1;
+		for(int i = 2; i <= n; ++i) //calc. C(i, j), only do n-1 times
+			for(int j = min(i, k); j >= 1; --j) 
+				v[j] = v[j-1] + v[j];
+		return v[k];
+	}
+private:
+	int n, k;
+};
+
 #endif
