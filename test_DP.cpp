@@ -14,6 +14,23 @@ ostream& operator<<(ostream& os, const vector<int>& vec) {
 	return os;
 }
 
+void testRodCutting(int argc, char* argv[])
+{
+	int p[11] = {0, 1, 5, 8, 9, 10, 17, 17, 20, 24, 30};
+	vector<int> pp(p, p+11);
+	for(int k = 1; k <= 10; ++k) { //length of rod being cut
+		RodCutting rc(k, pp), rc2(k, pp);
+		int rev = rc.solveBotUp();
+		int rev2 = rc2.solveTopDn();
+		cout << "Maximum revenue of cutting rod of length " << k << " is " << rev << " ";
+		rc.printSol();
+		cout << endl;
+		cout << "Maximum revenue of cutting rod of length " << k << " is " << rev2 << " ";
+		rc2.printSol();
+		cout << endl;
+	}
+}
+
 void testLCS(int argc, char* argv[])
 {
 	//string x = "abcbdab", y = "bdcaba";
