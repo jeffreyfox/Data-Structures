@@ -280,4 +280,32 @@ private:
 	vector<double> q; //probability of dummy keys (size of n+1)
 };
 
+
+///class to return the longest palindrome substring of a given string
+class LongestPalindrome {
+public:
+	LongestPalindrome(string str): s(str){};
+	string solve(){
+		int n = s.size();
+		int max_len = 0, max_i = 0;//length and starting index of longest palindrome substring
+		//c[i][j]: whether s.substr(i, j) is palindrome, i = p[0 ..n-1], j = [0 .. n]
+		vector<vector<bool> > c(n, vector<bool>(n+1, false));
+		int i, j, len;
+		for(i = 0; i < n; ++i) c[i][0] = c[i][1] = true; //empty string and 1-character string
+		max_len = 1, max_i = 0;
+		for(len = 2; len <= n; ++len) {
+			for(i = 0; i <= n-len; ++i) {
+				j = i+len-1; //end of substring 
+				if(s[i] == s[j] && c[i+1][len-2]){ //is palindrome
+					c[i][len] = true;
+					if(len > max_len) max_len = len, max_i = i;
+				}
+			}
+		}
+		return s.substr(max_i, max_len);
+	}
+private:
+	string s;
+};
+
 #endif
