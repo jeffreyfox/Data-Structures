@@ -7,6 +7,65 @@
 
 using namespace std;
 
+/// Class to solve the rod cutting problem (CLRS 15.1)
+class RodCutting {
+public:
+	RodCutting(int l, const vector<int>& price) : n(l), p(price) {}
+
+	//return the maximum profit for rod of length len (bottom-up approach)
+	int solveBotUp() {
+		r.resize(n+1, -1); //i = 0 .. n
+		c.resize(n+1, -1); // i = 0 .. n
+		r[0] = 0; c[0] = 0; //"cut" an empty rod
+		r[1] = p[1]; c[1] = 1; //"cut" a unit-length rod
+		int i, j;
+		for(i = 2; i <= n; ++i) { //calculate r[i]
+			for(j = 1; j <= i; ++j) { //try cutting at j (j = 1 .. i)
+				int rev = p[j] + r[i-j]; //sum of two pieces
+				if(rev > r[i]) r[i] = rev, c[i] = j;
+			}
+		}
+		return r[n]; //length n
+	}
+
+	///return the maximum profit for rod of length len (top-down memoized approach)
+	int solveTopDn() {
+		r.resize(n+1, -1); //i = 0 .. n
+		c.resize(n+1, -1); // i = 0 .. n
+		r[0] = 0; c[0] = 0; //"cut" an empty rod
+		return solveTopDnAux(n);
+	}
+
+	///Auxiliary function for top-down approach
+	int solveTopDnAux(int len) {
+		if(r[len] >= 0) return r[len];
+		for(int j = 1; j <= len; ++j) {
+			int rev = p[j] + solveTopDnAux(len-j); //sum of two pieces
+			if(rev > r[len]) r[len] = rev, c[len] = j;
+		}
+		return r[len];
+	}
+
+	///Print optimum cutting solution
+	void printSol() {
+		cout << "( ";
+		int len = n;
+		while(len) {
+			cout << c[len] << " ";
+			len = len - c[len];
+		}
+		cout << ") ";
+	}
+
+private:
+
+	vector<int> r; //r[i]: maximum revenue of cutting rod of length [i]
+	vector<int> c; //c[i]: first cut position of rod of length i to achieve maximum revenue
+
+	int n; //length of the rod being cut
+	vector<int> p; //price table for rod of difference lengths (0-n)
+};
+
 /// Class to solve longest common subsequence problem (CLRS 15.4)
 class LCS {
 public:
