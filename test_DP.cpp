@@ -96,3 +96,11 @@ void testOptBST(int argc, char* argv[])
 		cout << obst.r[k] << endl;
 	cout << endl;
 }
+
+void testPalindrome(int argc, char* argv[])
+{
+	string s("mississippi");
+	LongestPalindrome lp(s);
+	string ss = lp.solve();
+	cout << "Longest palindrome of '" << s << "' is '" << ss << "' " <<endl;	
+}
