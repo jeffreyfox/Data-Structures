@@ -66,7 +66,7 @@ private:
 	vector<int> p; //price table for rod of difference lengths (0-n)
 };
 
-/// Class to find the optimum way to parenthesize matrix-chain multiplication with least number of scalar multiplications
+/// Class to find the optimum way to parenthesize matrix-chain multiplication with least number of scalar multiplications (CLRS 15.2)
 class MatrixChainMultiply {
 public:
 	MatrixChainMultiply(const vector<int>& d) : n(d.size()-1), dim(d) { }
@@ -310,7 +310,6 @@ private:
 };
 
 /// Class to solve optimal binary search trees problem(CLRS 15.5)
-
 class OptBST {
 public:
 
@@ -414,6 +413,38 @@ public:
 	}
 private:
 	string s;
+};
+
+/// Class to solve edit distance problem (http://www.geeksforgeeks.org/dynamic-programming-set-5-edit-distance/)
+class EditDistance {
+public:
+	/// constructor
+	EditDistance(const string &s, const string &t) {
+		if(s.size() > t.size()) { x = s; y = t;} //y has smaller size
+		else { x = t; y = s; }
+	}
+
+	// calculate edit distance between x and y using 2D array d
+	int solve() {
+		int m = x.size(), n = y.size();
+		//len[i][j] is the edit distance between x[0 .. i-1] (length i) and y[0 .. j-1] (length j)
+		d.resize(m+1, vector<int>(n+1, 0));
+		int i, j;
+		//for empty strings
+		for(i = 0; i <= m; ++i) d[i][0] = i;
+		for(j = 1; j <= n; ++j) d[0][j] = j;
+		for(i = 1; i <= m; ++i) {
+			for(j = 1; j <= n; ++j) {
+				int c = (x[i-1] == y[j-1]) ? 0 : 1;//cost for replacement
+				d[i][j] = min(min(d[i-1][j]+1, d[i][j-1]+1), d[i-1][j-1]+c);
+			}
+		}
+		return d[m][n];
+	}
+
+private:
+	string x, y; //strings (y is shorter)
+	vector<vector<int> > d; //edit distance between x and y's substrings
 };
 
 #endif
