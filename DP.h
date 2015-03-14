@@ -66,6 +66,55 @@ private:
 	vector<int> p; //price table for rod of difference lengths (0-n)
 };
 
+/// Class to find the optimum way to parenthesize matrix-chain multiplication with least number of scalar multiplications
+class MatrixChainMultiply {
+public:
+	MatrixChainMultiply(const vector<int>& d) : n(d.size()-1), dim(d) { }
+
+	/// Returns the minimum number of scalar multiplications
+	int solve() {
+		c.resize(n+1, vector<int>(n+1, 0)); //c[i][j]: cost for matrix Ai .. Aj ( 1<=i <=j <= n), 0 not used
+		p.resize(n+1, vector<int>(n+1, 0)); //p[i][j]: partition point k for matrix Ai .. Aj ( 1<=i <=j <= n) into Ai .. Ak, Ak+1 .. Aj
+		//start with len = 1 and iterate to longer chainss
+		int i, j, k, len;
+		for(i = 0; i <= n; ++i) {
+			c[i][i] = 0; p[i][i] = i; //partition a single matrix
+		}
+		for(len = 2; len <= n; ++len) {
+			for(i = 1; i <= n+1-len; ++i) { //check Ai .. Aj of length len
+				j = i+len-1;
+				c[i][j] = INT_MAX;
+				for(k = i; k < j; ++k) { //ways of partition as Ai .. Ak, Ak+1, Aj
+					//cost is multiply (Ai .. Ak), multiply (Ak+1 .. Aj) and multiply two product matrices
+					int cost = c[i][k] + c[k+1][j] + dim[i-1]*dim[k]*dim[j]; 
+					if(cost < c[i][j]) c[i][j] = cost, p[i][j] = k;
+				}
+			}
+		}
+		return c[1][n];
+	}
+
+	/// Print the optimum parenthesizing way for A1 .. An
+	void printSol() { printSolAux(1, n);}
+
+	/// Auxiliary function to print the optimum parenthesizing way for A1 .. An
+	void printSolAux(int i, int j) {
+		if(i == j) cout << "A" << i << " ";
+		else {
+			cout << "( ";
+			int k = p[i][j];
+			printSolAux(i, k);
+			printSolAux(k+1, j);
+			cout << ") ";
+		}
+	}
+private:
+	vector<vector<int> > c; //minimum cost of scalar multiplication
+	vector<vector<int> > p; //partition position for the minimum cost of scalar multiplication
+	int n; //number of matrices 1 ~ n
+	vector<int> dim; //dimension of matrices (n+1): matrix i has dimension dim[i-1] x dim[i]
+};
+
 /// Class to solve longest common subsequence problem (CLRS 15.4)
 class LCS {
 public:
