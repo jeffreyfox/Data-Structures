@@ -148,3 +148,12 @@ void testBinomialCoeff(int argc, char* argv[])
 	BinomialCoeff bc(n, k);
 	cout << "C("<<n<<", "<<k<<") = "<<bc.solve()<<endl;
 }
+
+void testEggDrop(int argc, char* argv[])
+{
+	int n = 2, k = 100;
+	EggDrop ed(n, k);
+	int nt = ed.solve();
+	cout << "Egg drop, " << n << " eggs and " << k << " floors, minimum number of trials = " << nt << ", first drop = " << ed.firstDrop() << endl;
+}
+
