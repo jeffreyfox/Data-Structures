@@ -133,3 +133,11 @@ void testPalindrome(int argc, char* argv[])
 	string ss = lp.solve();
 	cout << "Longest palindrome of '" << s << "' is '" << ss << "' " <<endl;	
 }
+
+void testEditDistance(int argc, char* argv[])
+{
+	string x = "kitten", y = "sitting";
+	EditDistance ed(x, y);
+	int d = ed.solve();
+	cout << "Edit of <" << x << "> and <" << y << "> is " << d << endl;
+}
