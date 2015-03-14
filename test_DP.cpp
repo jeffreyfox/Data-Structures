@@ -31,6 +31,18 @@ void testRodCutting(int argc, char* argv[])
 	}
 }
 
+void testMatrixChainMultiply(int argc, char* argv[])
+{
+	//Dimensions for A1 .. A6
+	int d[7] = {30, 35, 15, 5, 10, 20, 25};
+	vector<int> dim(d, d+7);
+	MatrixChainMultiply mcm(dim);
+	int mc = mcm.solve();
+	cout << "Minimum cost of matrix chain multiplication is " << mc << endl;
+	mcm.printSol();
+	cout << endl;
+}
+
 void testLCS(int argc, char* argv[])
 {
 	//string x = "abcbdab", y = "bdcaba";
