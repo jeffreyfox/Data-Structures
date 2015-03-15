@@ -392,6 +392,8 @@ private:
 class LongestPalindrome {
 public:
 	LongestPalindrome(string str): s(str){};
+
+	// using a 2D array to store whether s.substr(i, j) is palindrome
 	string solve(){
 		int n = s.size();
 		int max_len = 0, max_i = 0;//length and starting index of longest palindrome substring
@@ -411,6 +413,26 @@ public:
 		}
 		return s.substr(max_i, max_len);
 	}
+
+	/// Without using a 2D array, check the longest possible array where s[i] is in the middle
+	string solve2() {
+		int n = s.size();
+		int max_len = 1, max_i = 0;//length and starting index of longest palindrome substring
+		int i, j;
+		for(i = 0; i < n; ++i) { //check the longest palindrome string where s[i] is in the middle
+			j = 1; //odd cases, abcba
+			while( i+j < n && i >= j && s[i+j] == s[i-j]) j++; //need to take care of array index bounds
+			//j points to one past the ending of longest palindrome, so s[i-j+1 .. i+j-1] is the longest palindrome
+			if(max_len < 2*j-1) max_len = 2*j-1, max_i = i-j+1; 
+
+			j = 1; //even cases, abccba
+			while( i+j < n && i >= j-1 && s[i+j] == s[i-j+1]) j++; //need to take care of array index bounds
+			//j points to one past the ending of longest palindrome, so s[i-j+2 .. i+j-1] is the longest palindrome
+			if(max_len < 2*j-2) max_len = 2*j-2, max_i = i-j+2;
+		}
+		return s.substr(max_i, max_len);
+	}
+
 private:
 	string s;
 };
