@@ -128,10 +128,16 @@ void testOptBST(int argc, char* argv[])
 
 void testPalindrome(int argc, char* argv[])
 {
-	string s("mississippi");
-	LongestPalindrome lp(s);
+	//string s("mississippi");
+	//string s("abdbacfcabdbade");
+	//string s("aaaaa");
+	string s("accbcbbcabacbacbccac");
+	
+	LongestPalindrome lp(s), lp2(s);
 	string ss = lp.solve();
+	string ss2 = lp2.solve2();
 	cout << "Longest palindrome of '" << s << "' is '" << ss << "' " <<endl;	
+	cout << "Longest palindrome of '" << s << "' is '" << ss2 << "' " <<endl;	
 }
 
 void testEditDistance(int argc, char* argv[])
