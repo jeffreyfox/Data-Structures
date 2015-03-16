@@ -590,4 +590,47 @@ private:
 	int k; // number of floors (0 .. k-1)
 };
 
+class CoinChange {
+public:
+	CoinChange(int nn, const vector<int> &ss) : n(nn), m(ss.size()), s(ss) {}
+	int solveBotUp() {
+		counter = 0;
+		vector<vector<int> > c(n+1, vector<int>(m, 0)); //c[i][j]: number of ways to change i cents using the coins s[0 .. j]
+		int i, j;
+		for(j = 0; j < m; ++j) c[0][j] = 1;
+		for(i = 1; i <= n; ++i) {
+			for(j = 0; j < m; ++j) {
+				if(s[j] <= i) c[i][j] += c[i-s[j]][j];
+				if(j > 0) c[i][j] += c[i][j-1];
+				//cout << "c["<<i<<"]["<<j<<"] = "<<c[i][j]<<endl;
+				counter ++;
+			}
+		}
+		return c[n][m-1];
+	}
+
+	int solveTopDn() {
+		counter = 0;
+		vector<vector<int> > c(n+1, vector<int>(m, -1)); //c[i][j]: number of ways to change i cents using the coins s[0 .. j]
+		for(int j = 0; j < m; ++j) c[0][j] = 1;
+		return solveTopDnUtil(c, n, m-1);
+	}
+
+	int solveTopDnUtil(vector<vector<int> > &c, int i, int j) { //get c[i][j]
+		if(c[i][j] >= 0) return c[i][j];
+		c[i][j] = 0;
+		if(s[j] <= i) c[i][j] += solveTopDnUtil(c, i-s[j], j);
+		if(j > 0) c[i][j] += solveTopDnUtil(c, i, j-1);
+		counter ++;
+		return c[i][j];
+	}
+
+	int counter; //number of times the c[i][j] entries are calculated
+
+private:
+	int n; //total amount n cents
+	int m; //number of change types
+	vector<int> s; //types of coins
+};
+
 #endif
