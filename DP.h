@@ -387,7 +387,6 @@ private:
 	vector<double> q; //probability of dummy keys (size of n+1)
 };
 
-
 ///class to return the longest palindrome substring of a given string
 class LongestPalindrome {
 public:
@@ -433,6 +432,82 @@ public:
 		return s.substr(max_i, max_len);
 	}
 
+private:
+	string s;
+};
+
+///class to return the longest palindrome substring of a given string
+class PalindromePartition {
+public:
+	PalindromePartition(string str): s(str){};
+
+	/// Return the minimum cut to partition a string into palindrome segments
+	/// O(n2) solution using O(n2) auxiliary space
+	int solve() {
+		int n = s.size();
+		c.resize(n+1, 0); //c[i]: minimum cuts of sustring s[0 .. i-1], i = 0 .. n
+		p.resize(n+1, 0); //p[i] = k: cutting position of substring s[0 .. i-1] (cut before s[k])
+		int i, j;
+		for(i = 0; i <= n; ++i) c[i] = i-1, p[i] = i-1; // s[0 ..i-1] can be partitioned by at most i-1 cuts, first cut before s[i-1]
+
+		vector<vector<bool> > t(n, vector<bool>(n+1, false)); //whether s[i ..j-1] is palindrome, i = 0 .. n-1, j = i .. n
+		for(i = 0; i < n; ++i) t[i][i] = true, t[i][i+1] = true; //empty string and single letter string
+		for(int len = 2; len <= n ; ++len) {
+			for(i = 0; i <= n-len; ++i) {
+				j = i+len;//one past end
+				t[i][j] = (s[i] == s[j-1] && t[i+1][j-1]);
+			}
+		}
+
+		//now check minimum cuts
+		for(i = 1; i <= n; ++i) { //check substring s[0 .. i-1]
+			if(t[0][i]) c[i] = 0, p[i] = -1; //string is palindrome, no need to cut
+			else {
+				for(j = 1; j < i; ++j) { //try cut position before a[j], j = 1 .. i
+					if(t[j][i] && c[j]+1 < c[i]) c[i] = c[j]+1, p[i] = j;
+				}
+			}
+		}
+		return c[n];
+	}
+
+	//O(n2) solution using O(n) auxiliary space
+	int solve2() {
+		int n = s.size();
+		c.resize(n+1, 0); //c[i]: minimum cuts of length i sustring s[0 .. i-1], i = 0 .. n
+		p.resize(n+1, 0); //p[i] = k: cutting position of length i substring s[0 .. i-1] (cut before s[k])
+		int i, j;
+		for(i = 0; i <= n; ++i) c[i] = i-1, p[i] = i-1; // s[0 ..i-1] can be partitioned by at most i-1 cuts, first cut before s[i-1]
+
+		for(i = 0; i <= n; ++i) { // check if s[i] is in the middle of any palindrome
+			for(j = 0; i+j < n && i-j >= 0; ++j) { // odd case, include j = 0 case itself!
+				if(s[i+j] == s[i-j]) { // s[i-j .. i+j] is palindrome, then update s[0 ..i+j]
+					if(c[i-j]+1 < c[i+j+1]) c[i+j+1] = c[i-j]+1, p[i+j+1] = i-j;
+				} else break; //stop checking further
+			}
+			for(j = 1; i+j < n && i-j+1 >= 0; ++j) { // even case
+				if(s[i+j] == s[i-j+1]) { // s[i-j+1 .. i+j] is palindrome, then update s[0 ..i+j]
+					if(c[i-j+1]+1 < c[i+j+1]) c[i+j+1] = c[i-j+1]+1, p[i+j+1] = i-j+1;
+				} else break; //stop checking further
+			}
+		}
+		return c[n];
+	}
+
+	void printSol() { printSolAux(s.size()); }
+	void printSolAux(int i) { //print partition for s[0 .. i-1]
+		int pos = p[i];
+		if(pos > 0) {
+			printSolAux(pos);
+			cout << " | ";
+			cout << s.substr(pos, i-pos);
+		} else {
+			cout << s.substr(0, i);
+		}
+	}
+
+	vector<int> c; //minimum cuts of substring s[0 .. i]
+	vector<int> p; //right most cutting positions of substring of s[0 .. i]
 private:
 	string s;
 };
