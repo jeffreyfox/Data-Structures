@@ -128,16 +128,25 @@ void testOptBST(int argc, char* argv[])
 
 void testPalindrome(int argc, char* argv[])
 {
-	//string s("mississippi");
-	//string s("abdbacfcabdbade");
-	//string s("aaaaa");
-	string s("accbcbbcabacbacbccac");
-	
-	LongestPalindrome lp(s), lp2(s);
-	string ss = lp.solve();
-	string ss2 = lp2.solve2();
-	cout << "Longest palindrome of '" << s << "' is '" << ss << "' " <<endl;	
-	cout << "Longest palindrome of '" << s << "' is '" << ss2 << "' " <<endl;	
+	string str[] = {"mississippi", "abdbacfcabdbade", "aaaaa", "accbcbbcabacbacbccac", 
+		"121222212121212121222211211212111212", "abcde", "aaaab"};
+	for(int k = 0; k < 7; ++k) {
+		string s = str[k];
+		LongestPalindrome lp(s), lp2(s);
+		string ss = lp.solve();
+		string ss2 = lp2.solve2();
+		cout << "Longest palindrome of '" << s << "' is '" << ss << "' " <<endl;	
+		cout << "Longest palindrome of '" << s << "' is '" << ss2 << "' " <<endl;	
+
+		PalindromePartition pp(s), pp2(s);
+		int mc = pp.solve(), mc2 = pp2.solve2();
+		cout << "Minium partition cut of '" << s << "' is '" << mc << "' " << endl;
+		pp.printSol();
+		cout << endl;
+		cout << "Minium partition cut of '" << s << "' is '" << mc2 << "' " << endl;
+		pp2.printSol();
+		cout << endl;
+	}
 }
 
 void testEditDistance(int argc, char* argv[])
