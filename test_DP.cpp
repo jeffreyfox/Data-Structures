@@ -172,3 +172,19 @@ void testEggDrop(int argc, char* argv[])
 	cout << "Egg drop, " << n << " eggs and " << k << " floors, minimum number of trials = " << nt << ", first drop = " << ed.firstDrop() << endl;
 }
 
+void testCoinChange(int argc, char* argv[])
+{
+	int n = 7;
+	int s[] = {1, 2, 3, 4, 5};
+	vector<int> ss(s, s+ sizeof(s)/sizeof(int));
+	CoinChange cc(n, ss);
+	CoinChange cc2(n, ss);
+	int count = cc.solveBotUp();
+	int count2 = cc2.solveTopDn();
+	cout << " n = " << n << ", array = " << ss << endl;
+	cout << " count = " << count <<endl;
+	cout << " count = " << count2 <<endl;
+	cout << " Bottom up executed " << cc.counter << " times " << endl;
+	cout << " Top down executed " << cc2.counter << " times " << endl;
+}
+
