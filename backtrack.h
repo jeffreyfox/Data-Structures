@@ -80,7 +80,7 @@ public:
 	//check row i
 	bool solveUtil(int i) {
 		if(i == n) return true;
-		for(int j = 0; j < 8; ++j) { //try the j-th column
+		for(int j = 0; j < n; ++j) { //try the j-th column
 			if(canPlace(i, j)) {
 				col[i] = j;
 				if(solveUtil(i+1)) return true; //found a solution
