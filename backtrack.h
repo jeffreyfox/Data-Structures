@@ -111,4 +111,70 @@ private:
 	vector<int> col;
 };
 
+class Sudoku {
+public:
+	Sudoku(int nn, const vector<vector<int> >& g) : n(nn), grid(g) {}
+	bool solve() {
+		int i(0), j(0);
+		//find first unfilled position
+		if(grid[i][j] !=0) next(i, j);
+		if(i == n) return true; //all filled
+		return solveUtil(i, j);
+	}
+	//fill entry grid[i][j]
+	bool solveUtil(int i, int j) {
+		if(i == n) return true; //one past end
+		for(int k = 1; k <= n; ++k) {
+			if(isSafe(i, j, k)) {
+				grid[i][j] = k;
+				int next_i(i), next_j(j);
+				next(next_i, next_j);
+				if(solveUtil(next_i, next_j)) return true;
+			}
+		}
+		//not found a solution
+		grid[i][j] = 0;
+		return false;
+	}
+
+	//is putting val at grid[i][j] safe?
+	bool isSafe(int i, int j, int val) {
+		int k, l;
+
+		//column check
+		for(k = 0; k < n; ++k) 
+			if(grid[k][j] == val) return false;
+
+		//row check
+		for(k = 0; k < n; ++k) 
+			if(grid[i][k] == val) return false;
+
+		//box check
+		for(k = (i/3)*3; k < (i/3)*3+3; ++k)
+			for(l = (j/3)*3; l < (j/3)*3+3; ++l)
+				if(grid[k][l] == val) return false;
+
+		return true;
+	}
+	//move to next position
+	void next(int& i, int& j) {
+		i = (j == n-1) ? i+1 : i;
+		j = (j == n-1) ? 0 : j+1;
+		while(i != n && grid[i][j] != 0) {
+			i = (j == n-1) ? i+1 : i;
+			j = (j == n-1) ? 0 : j+1;
+		}
+	}
+	void printSol() {
+		for(int i = 0; i < n; ++i) {
+			for(int j = 0; j < n; ++j)
+				cout << " " << grid[i][j] << " ";
+			cout << endl;
+		}
+	}
+private:
+	int n; //dimension;
+	vector<vector<int> > grid;
+};
+
 #endif
