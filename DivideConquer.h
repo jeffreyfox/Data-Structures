@@ -6,6 +6,10 @@
 #include <vector>
 #include <string>
 #include <climits>
+#include <cassert>
+#include <algorithm>
+#include <cfloat>
+#include <cmath>
 
 using namespace std;
 
@@ -188,6 +192,155 @@ private:
 	vector<int> arr;
 	Element sol;
 	bool allowEmpty; //allow empty sub-array
+};
+
+class ChipTest {
+public:
+	struct Chip {
+		int index;
+		char tag;
+		Chip() : index(-1), tag('b') {}
+		Chip(int i, char t) : index(i), tag(t) {}
+	};
+
+	ChipTest(int tot, int bad) : nTot(tot), nBad(bad) { 
+		if(nTot - nBad <= nBad) throw std::invalid_argument("Bad chips should be less than half of total!\n");
+		chips.resize(nTot);
+		for(int k = 0; k < nTot; ++k) chips[k].index = k, chips[k].tag = 'g';
+	}
+
+	void init(int seed) {
+		srand(seed);
+		for(int k = 0; k < nBad; ++k) {
+			double rd = rand();
+			int idx = 1.0*nTot*rand()/RAND_MAX;
+			while(idx >= nTot || chips[idx].tag == 'b') idx = 1.0*rand()*nTot/RAND_MAX;
+			chips[idx].tag = 'b';
+		}
+		print();
+	}
+
+	void init(vector<int> bad) {
+		for(int k = 0; k < bad.size(); ++k) 
+			chips[bad[k]].tag = 'b';
+		print();
+	}
+
+	void print() {
+		cout << nBad << " out of " << nTot << " chips are bad : (";
+		for(int k = 0; k < nTot; ++k) 
+			if(chips[k].tag == 'b') cout << k << " ";
+		cout << ") " << endl;
+		cout << nTot - nBad << " out of " << nTot << " chips are good : (";
+		for(int k = 0; k < nTot; ++k) 
+			if(chips[k].tag == 'g') cout << k << " ";
+		cout << ") " << endl;
+	}
+
+	int PairTest(Chip chip1, Chip chip2) {
+		int t1, t2;
+		if(chip1.tag == 'g') t2 = (chip2.tag == 'g') ? 1 : 0; //chip1 is good
+		else t2 = (1.0*rand()/RAND_MAX > 0.5) ? 1 : 0; //random
+		if(chip2.tag == 'g') t1 = (chip1.tag == 'g') ? 1 : 0; //chip2 is good
+		else t1 = (1.0*rand()/RAND_MAX > 0.5) ? 1 : 0; //random
+		return (t1 << 1) + t2;
+	}
+
+	int findGood() { 
+		int idx = findGoodUtil(chips);
+		assert(chips[idx].tag == 'g');
+		return idx;
+	}
+
+	int findGoodUtil(const vector<Chip> &cps) {
+		int n = cps.size();
+		if(n <= 1) return cps[0].index;
+		vector<Chip> newcps;
+		for(int k = 0; k+1 < n; k+=2) {
+			int res = PairTest(cps[k], cps[k+1]);
+			if(res == 3) newcps.push_back(cps[k]); //only keep one of 'good-good'
+		}
+		//odd case
+		if(newcps.size() % 2 == 0) newcps.push_back(cps[n-1]); //the number of pairs is even, add last entry to array
+		return findGoodUtil(newcps);
+	}
+
+private:
+	vector<Chip> chips;
+	int nTot;
+	int nBad;
+};
+
+struct Point {
+	double x, y;
+	Point(): x(0.0), y(0.0) {}
+	Point(double xx, double yy) : x(xx), y(yy) {}
+};
+
+bool compareX(Point p1, Point p2) { return p1.x < p2.x; }
+bool compareY(Point p1, Point p2) { return p1.y < p2.y; }
+
+class NearestPoints {
+public:
+
+
+	NearestPoints(const vector<Point> &p) : n(p.size()), pts(p) {}
+
+	//O(n2) brute-force solution
+	double solve1() {
+		double minD = DBL_MAX;
+		for(int i = 0; i < n; ++i) {
+			for(int j = i+1; j < n; ++j) {
+				minD = min(minD, getDist(pts[i],pts[j]));
+			}
+		}
+		return minD;
+	}
+
+	//O(nlgn) solution
+	double solve2() {
+		vector<Point> psx(pts), psy(pts);
+		sort(psx.begin(), psx.end(), compareX);//sort x-coordinate
+		sort(psy.begin(), psy.end(), compareY);//sort y-coordinate
+		return minDist(pts_sort_x, 0, n-1, psy);
+	}
+
+	//get minimum distance between points indiced l to r in x-coordinate sorted point array psx.
+	//y-coordinate sorted array is used as auxiliary information for strip point search
+	double minDist(const vector<Point>& pts_sort_x, int l, int r, const vector<Point>& psy) {
+		if(r == l) return DBL_MAX; //only one point
+		if(r == l + 1) return getDist(pts_sort_x[l], pts_sort_x[r]); //two points
+		int m = (l+r)/2; //middle pivot point
+		const Point& pivot = psx[m];
+		vector<Point> psy_left, psy_right;//points sort y on the left, right of pivot point
+		for(int k = 0; k < psy.size(); ++k) { //partition psy according to pivot
+			if(psy[k].x <= pivot.x) psy_left.push_back(psy[k]);
+			else psy_right.push_back(psy[k]);
+		}
+		double minL = minDist(psx, l, m, psy_left);
+		double minR = minDist(psx, m+1, r, psy_right);
+		double minD = min(minL, minR);
+		vector<Point> strip_pts; //strip points (sorted by y-coordinate)
+		for(int k = 0; k < psy.size(); ++k) {
+			if(fabs(psy[k].x - pivot.x) < minD) strip_pts.push_back(psy[k]); 
+		}
+		int nstrip = strip_pts.size();
+		for(int i = 0; i < nstrip; ++i) { //check all strip points (sorted by y-coordinate)
+			for(int j = i+1; j < nstrip && strip_pts[j].y - strip_pts[i].y < minD; ++j) { //at most 7 times
+				double dist = getDist(strip_pts[j], strip_pts[i]);
+				if(dist < minD) minD = dist;
+			}
+		}
+		return minD;
+	}
+
+	double getDist(Point p1, Point p2) {
+		return sqrt((p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y));
+	}
+
+private:
+	int n; //number of points
+	vector<Point> pts;
 };
 
 #endif
