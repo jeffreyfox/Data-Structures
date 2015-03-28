@@ -1,11 +1,38 @@
-#ifndef HEAP_H
-#define HEAP_H
+#ifndef SORT_H
+#define SORT_H
 
 #include <iostream>
 #include <vector>
 #include <string>
+#include <algorithm>
 
 using namespace std;
+
+//Bucket sort, assume array is uniformly distributed between 0 and 1
+class BucketSort {
+public:
+	void sort(vector<double>& arr) {
+		int n = arr.size();
+		if(n <= 1) return;
+		vector<vector<double> > buckets(n);
+		//create buckets
+		for(int i = 0; i < n; ++i)
+			buckets[arr[i]*n].push_back(arr[i]);
+		//sort within buckets
+		for(int i = 0; i < n; ++i) 
+			std::sort(buckets[i].begin(), buckets[i].end());
+		//collect all buckets
+		int k = 0;
+		for(int i = 0; i < n; ++i) {
+			cout << "bucket " << i << " : ";
+			for(int j = 0; j < buckets[i].size(); ++j) {
+				arr[k++] = buckets[i][j];
+				cout << buckets[i][j] << " ";
+			}
+			cout << endl;
+		}
+	}
+};
 
 class RadixSort {
 public:
