@@ -3,6 +3,21 @@
 extern ostream& operator<<(ostream& os, const vector<double>& vec);
 extern ostream& operator<<(ostream& os, const vector<int>& vec);
 
+void testBucketSort(int argc, char* argv[])
+{
+	BucketSort bsort;
+	int n = 20;
+	int seed = 20;
+	srand(seed);
+	vector<double> num(n, 0);
+	for(int i = 0; i < n; ++i) {
+		num[i] = 1.0*rand()/RAND_MAX;
+	}
+	cout << num << endl;
+	bsort.sort(num);
+	cout << num << endl;
+}
+
 void testRadixSort(int argc, char* argv[])
 {
 	RadixSort rsort(10);
@@ -18,7 +33,7 @@ void testRadixSort(int argc, char* argv[])
 	rsort.sort(num);
 	cout << num << endl;
 
-	//sort n numbers with values varying from 0 to n3-1. (CLRS 8.3-4)
+	//sort n numbers with values varying from 0 to n3-1.
 	n = 13;
 	RadixSort rsort2(n);  // use n as radix
 	vector<int> num2(n, 0);
