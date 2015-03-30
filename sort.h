@@ -8,6 +8,97 @@
 
 using namespace std;
 
+class QuickSort {
+public:
+	QuickSort(bool r, int m) : randomized(r), method(m) {}
+
+	//qsort
+	void sort(vector<int> &arr) {
+		int n = arr.size();
+		sortUtil(arr, 0, n-1);
+	}
+
+	void sortUtil(vector<int> &arr, int p, int r) {
+		if(r <= p) return;		
+		int q;
+		if(method == 1) q = partition1(arr, p, r);
+		else if(method == 2) q = partition2(arr, p, r);
+		else q = partition3(arr, p, r); //Hoare
+
+		if(method == 1 || method == 2) {
+			sortUtil(arr, p, q-1);
+			sortUtil(arr, q+1, r);
+		} else { //Hoare
+			sortUtil(arr, p, q); 
+			sortUtil(arr, q+1, r);
+		}
+	}
+
+	//partition method 1 (CLRS), use arr[r] as pivot
+	int partition1(vector<int> &arr, int p, int r) {
+		if(randomized) {
+			int i = rand(p, r);
+			swap(arr[i], arr[r]);
+		}
+
+		int x = arr[r];
+		int i(p), j(p);
+		for(j = p; j < r; ++j) {
+			if(arr[j] <= x) swap(arr[i++], arr[j]);
+		}
+		swap(arr[r], arr[i]);
+		return i;
+	}
+
+	//partition method 2 (Algorithms in C++), use arr[r] as pivot
+	int partition2(vector<int> &arr, int p, int r) {
+		if(randomized) {
+			int i = rand(p, r);
+			swap(arr[i], arr[r]);
+		}
+
+		int x = arr[r]; //last element as pivot
+		int i = p-1, j = r;
+		while(1) {
+			while(arr[++i] < x); //A[i] is first element >= x
+			while(arr[--j] > x) if(j == p) break; //A[j] is first element <= x
+			if(i < j) swap(arr[i], arr[j]);
+			else break;
+		}
+		swap(arr[i], arr[r]);
+		return i;
+	}
+
+	//method 3: Hoare partition (CLRS), use arr[p] as pivot
+	int partition3(vector<int> &arr, int p, int r) {
+		if(randomized) {
+			int i = rand(p, r);
+			swap(arr[i], arr[p]);
+		}
+
+		int x = arr[p];
+		int i = p-1, j = r+1;
+		while(1) {
+			while(arr[--j] > x);
+			while(arr[++i] < x);
+			if(i < j) swap(arr[i], arr[j]);
+			else return j;
+		}
+	}
+
+	void swap(int &a, int &b) {
+		int t = a; a = b; b = t;
+	}
+
+	int rand(int p, int r) {
+		int l = r-p+1;
+		return (int) p+l*1.0*std::rand()/RAND_MAX;
+	}
+private:
+	bool randomized;
+	int method;
+};
+
 //Bucket sort, assume array is uniformly distributed between 0 and 1
 class BucketSort {
 public:
