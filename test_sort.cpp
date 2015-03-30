@@ -3,6 +3,29 @@
 extern ostream& operator<<(ostream& os, const vector<double>& vec);
 extern ostream& operator<<(ostream& os, const vector<int>& vec);
 
+void testQuickSort(int argc, char* argv[])
+{
+	int seed = 23;
+	srand(seed);
+	bool random = false;
+	QuickSort qs1(random, 1), qs2(random, 2), qs3(random, 3);
+	int num[] = {13,19,9,5,12,8,7,4,21,2,6,11};
+	//int num[20];
+	//for(int k = 0; k < 20; ++k) num[k] = k;
+	int n = sizeof(num)/sizeof(int);
+	vector<int> arr1(num, num+n), arr2 = arr1, arr3 = arr1;
+	cout << arr1 << endl;
+
+	qs1.sort(arr1);
+	cout << arr1 << endl;
+
+	qs2.sort(arr2);
+	cout << arr2 << endl;
+
+	qs3.sort(arr3);
+	cout << arr3 << endl;
+}
+
 void testBucketSort(int argc, char* argv[])
 {
 	BucketSort bsort;
