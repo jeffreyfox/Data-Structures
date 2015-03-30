@@ -8,12 +8,12 @@ void testQuickSort(int argc, char* argv[])
 	int seed = 23;
 	srand(seed);
 	bool random = false;
-	QuickSort qs1(random, 1), qs2(random, 2), qs3(random, 3);
-	int num[] = {13,19,9,5,12,8,7,4,21,2,6,11};
-	//int num[20];
-	//for(int k = 0; k < 20; ++k) num[k] = k;
+	QuickSort qs1(random, 1), qs2(random, 2), qs3(random, 3), qs4(random, 4);
+	//int num[] = {13,19,9,5,12,8,7,4,21,2,6,11};
+	int num[20];
+	for(int k = 0; k < 20; ++k) num[k] = 5*1.0*rand()/RAND_MAX;
 	int n = sizeof(num)/sizeof(int);
-	vector<int> arr1(num, num+n), arr2 = arr1, arr3 = arr1;
+	vector<int> arr1(num, num+n), arr2 = arr1, arr3 = arr1, arr4 = arr1;
 	cout << arr1 << endl;
 
 	qs1.sort(arr1);
@@ -24,6 +24,9 @@ void testQuickSort(int argc, char* argv[])
 
 	qs3.sort(arr3);
 	cout << arr3 << endl;
+
+	qs4.sort(arr4);
+	cout << arr4 << endl;
 }
 
 void testBucketSort(int argc, char* argv[])
