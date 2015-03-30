@@ -19,18 +19,22 @@ public:
 	}
 
 	void sortUtil(vector<int> &arr, int p, int r) {
-		if(r <= p) return;		
-		int q;
+		if(r <= p) return;	
+		int q, t;
 		if(method == 1) q = partition1(arr, p, r);
 		else if(method == 2) q = partition2(arr, p, r);
-		else q = partition3(arr, p, r); //Hoare
+		else if(method == 3) q = partition3(arr, p, r); //Hoare
+		else partition4(arr, p, r, q, t);
 
 		if(method == 1 || method == 2) {
 			sortUtil(arr, p, q-1);
 			sortUtil(arr, q+1, r);
-		} else { //Hoare
+		} else if(method == 3){ //Hoare
 			sortUtil(arr, p, q); 
 			sortUtil(arr, q+1, r);
+		} else {
+			sortUtil(arr, p, q-1); 
+			sortUtil(arr, t+1, r);
 		}
 	}
 
@@ -84,6 +88,22 @@ public:
 			if(i < j) swap(arr[i], arr[j]);
 			else return j;
 		}
+	}
+
+	//method 4: partition with equal element values (3-color sort)
+	void partition4(vector<int> &arr, int p, int r, int &q, int &t) {
+		int x = arr[r];
+		int lo(p), mid(p), hi(r);
+		//arr[p .. lo-1] < x
+		//arr[lo .. mid-1] = x
+		//arr[mid .. hi] ??
+		//arr[hi+1 .. r] > x
+		while(mid <= hi) {
+			if(arr[mid] < x) swap(arr[lo++], arr[mid++]);
+			else if(arr[mid] == x) mid++;
+			else swap(arr[mid], arr[hi--]);
+		}
+		q = lo; t = mid-1;
 	}
 
 	void swap(int &a, int &b) {
