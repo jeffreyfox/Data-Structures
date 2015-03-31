@@ -27,6 +27,16 @@ void testQuickSort(int argc, char* argv[])
 
 	qs4.sort(arr4);
 	cout << arr4 << endl;
+
+	int num2[] = {13,19,9,5,12,8,7,4,21,2,6,11};
+	int n2 = sizeof(num2)/sizeof(int);
+	vector<int> arr5(num2, num2+n2);
+
+	int i = 8;
+	int v = qs1.select(arr5, i);
+	qs1.sort(arr5);
+	cout << arr5 << endl;
+	cout << "Order static " << 3 << " of array is " << v << endl;
 }
 
 void testBucketSort(int argc, char* argv[])
