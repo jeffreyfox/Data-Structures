@@ -38,6 +38,21 @@ public:
 		}
 	}
 
+	//select the i-th order statistic in array
+	int select(vector<int> &arr, int i) {
+		int n = arr.size();
+		if(i < 1 || i > n) exit(1);
+		return selectUtil(arr, 0, n-1, i);
+	}
+	int selectUtil(vector<int> &arr, int p, int r, int i) {
+		if(r == p) return arr[p];
+		int q = partition1(arr, p, r);
+		int k = q-p+1; //length of first half
+		if(i == k) return arr[q];
+		else if(i < k) return selectUtil(arr, p, q-1, i);
+		else return selectUtil(arr, q+1, r, i-k);
+	}
+
 	//partition method 1 (CLRS), use arr[r] as pivot
 	int partition1(vector<int> &arr, int p, int r) {
 		if(randomized) {
