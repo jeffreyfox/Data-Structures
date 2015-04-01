@@ -123,6 +123,45 @@ private:
 //select k-th order statistics from arrays
 class SelectKth {
 public:
+
+	//Binary search algorithm to selelect k-th order statistics from two SORTED arrays. Average O(m+n) time.
+	int Select(vector<int> &A, vector<int> &B, int k) {
+		int n1 = A.size();
+		int n2 = B.size();
+		if(n1 == 0) return B[k-1];
+		else if(n2 == 0) return A[k-1];
+		int idx = SelectUtil(A, B, 0, n1-1, k);
+		if(idx >= 0) return A[idx];
+		else {
+			idx = SelectUtil(B, A, 0, n2-1, k);
+			return B[idx];
+		}
+	}
+
+	//Utility function to find the k-th order static in A+B in A[l .. r]
+	int SelectUtil(vector<int> &A, vector<int> &B, int l, int r, int k) {
+		cout << "Select ("<<l << " " << r << ") k = " << k <<endl;
+		if(r < l) return -1;
+		int m = (l+r)/2, n = B.size();
+		int x = A[m];
+		//x is <= m+1 elements in A, check if x is <= k-(m+1) elements in B
+		int q = k-m-1;
+		cout << "m = " << m << ", x = " << A[m] <<", q = " << q <<endl;
+		if(q < 0) return SelectUtil(A, B, l, m-1, k); //search left (A[l .. m-1])
+		else if(q > n) return SelectUtil(A, B, m+1, r, k); //search right (A[m+1 .. r])
+		else if(q == 0) {
+			if(x <= B[q]) return m;
+			else return SelectUtil(A, B, l, m-1, k);
+		} else if (q == n) {
+			if( x >= B[q-1]) return m;
+			else return SelectUtil(A, B, m+1, r, k);
+		} else {
+			if(x >= B[q-1] && x <= B[q]) return m;
+			else if (x > B[q]) return SelectUtil(A, B, l, m-1, k);
+			else return SelectUtil(A, B, m+1, r, k);
+		}
+	}
+
 	//Random algorithm to select k-th order statistics from unsorted array. Expected O(n) time, worst-case O(n2) time
 	int RSelect(vector<int> &arr, int k) {
 		int n = arr.size();
