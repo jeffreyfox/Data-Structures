@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <cassert>
 
 using namespace std;
 
@@ -36,21 +37,6 @@ public:
 			sortUtil(arr, p, q-1); 
 			sortUtil(arr, t+1, r);
 		}
-	}
-
-	//select the i-th order statistic in array
-	int select(vector<int> &arr, int i) {
-		int n = arr.size();
-		if(i < 1 || i > n) exit(1);
-		return selectUtil(arr, 0, n-1, i);
-	}
-	int selectUtil(vector<int> &arr, int p, int r, int i) {
-		if(r == p) return arr[p];
-		int q = partition1(arr, p, r);
-		int k = q-p+1; //length of first half
-		if(i == k) return arr[q];
-		else if(i < k) return selectUtil(arr, p, q-1, i);
-		else return selectUtil(arr, q+1, r, i-k);
 	}
 
 	//partition method 1 (CLRS), use arr[r] as pivot
@@ -127,11 +113,103 @@ public:
 
 	int rand(int p, int r) {
 		int l = r-p+1;
-		return (int) p+l*1.0*std::rand()/RAND_MAX;
+		return int(p+l*1.0*std::rand()/RAND_MAX);
 	}
 private:
 	bool randomized;
 	int method;
+};
+
+//select k-th order statistics from arrays
+class SelectKth {
+public:
+	//Random algorithm to select k-th order statistics from unsorted array. Expected O(n) time, worst-case O(n2) time
+	int RSelect(vector<int> &arr, int k) {
+		int n = arr.size();
+		return RSelectUtil(arr, 0, n-1, k);
+	}
+
+	//Deterministic algorithm to select k-th order statistics from unsorted array. Expected O(n) time, worst-case O(n) time
+	int DSelect(vector<int> &arr, int k) {
+		int n = arr.size();
+		return DSelectUtil(arr, 0, n-1, k);
+	}
+
+	//Utility function to select k-th order statistics from sub-array arr[p..r] (random)
+	int RSelectUtil(vector<int> &arr, int p, int r, int k) {
+		if(p == r) return arr[p]; //only one element in array, just return it
+		int i = rand(p, r); 
+		swap(arr[i], arr[r]);//use random pivot
+		int q = partition(arr, p, r);
+		int l = q-p+1;
+		if(l == k) return arr[q];
+		else if(l > k) return RSelectUtil(arr, p, q-1, k);
+		else return RSelectUtil(arr, q+1, r, k-l);
+	}
+
+	//Utility function to select k-th order statistics from sub-array arr[p..r] (deteriministic)
+	int DSelectUtil(vector<int> &arr, int p, int r, int k) {
+		if(p == r) return arr[p]; //only one element in array, just return it
+
+		//find median of medians
+		int n = r-p+1, i(0);
+		int nmed = (n+4)/5; //number of medians as ceiling of n/5.0, can also use (n-1)/5+1, or n/5 + (n%5!=0)
+		vector<int> medians(nmed, 0);
+		for(i = 0; i < nmed-1; ++i) medians[i] = findMedian(arr, p+i*5, p+i*5+4);
+		medians[i] = findMedian(arr, p+i*5, r); //last one
+		int mom = DSelectUtil(medians, 0, nmed-1, nmed/2); // (lower) median of medians
+
+		//find median index using linear search
+		int midx = -1;
+		for(i = p; i <= r; ++i) {
+			if(arr[i] == mom) { 
+				midx = i; break; 
+			}
+		}
+		//partition using median of medians
+		swap(arr[midx], arr[r]);
+		int q = partition(arr, p, r);
+		int len = q-p+1;
+		if(len == k) return arr[q];
+		else if(len > k) return DSelectUtil(arr, p, q-1, k);
+		else return DSelectUtil(arr, q+1, r, k-len);
+	}
+
+private:
+
+	//find lower median of arr[p..r] using insertion sort
+	int findMedian(vector<int> &arr, int p, int r) {
+		int i(p), j(p);
+		for(i = p+1; i <= r; ++i) {
+			int v = arr[i];
+			for(j = i-1; j >=p; --j) {
+				if(arr[j] > v) arr[j+1] = arr[j];
+				else break;
+			}
+			arr[j+1] = v;
+		}
+		return arr[(p+r)/2]; //lower median
+	}
+
+	//partition of arr[p .. r] using arr[r] as pivot
+	int partition(vector<int> &arr, int p, int r) {
+		int x = arr[r];
+		int i(p), j(p);
+		for(j = p; j < r; ++j) {
+			if(arr[j] <= x) swap(arr[i++], arr[j]);
+		}
+		swap(arr[i], arr[r]);
+		return i;
+	}
+
+	//randomly select a number from p to r
+	int rand(int p, int r) {
+		return int(p + (r-p+1)*1.0*std::rand()/RAND_MAX);
+	}
+
+	void swap(int &a, int &b) {
+		int t = a; a = b; b = t;
+	}
 };
 
 //Bucket sort, assume array is uniformly distributed between 0 and 1
@@ -143,7 +221,7 @@ public:
 		vector<vector<double> > buckets(n);
 		//create buckets
 		for(int i = 0; i < n; ++i)
-			buckets[arr[i]*n].push_back(arr[i]);
+			buckets[unsigned(arr[i]*n)].push_back(arr[i]);
 		//sort within buckets
 		for(int i = 0; i < n; ++i) 
 			std::sort(buckets[i].begin(), buckets[i].end());
