@@ -9,9 +9,9 @@ void testQuickSort(int argc, char* argv[])
 	srand(seed);
 	bool random = false;
 	QuickSort qs1(random, 1), qs2(random, 2), qs3(random, 3), qs4(random, 4);
-	//int num[] = {13,19,9,5,12,8,7,4,21,2,6,11};
-	int num[20];
-	for(int k = 0; k < 20; ++k) num[k] = 5*1.0*rand()/RAND_MAX;
+	int num[] = {13,19,9,5,12,8,7,4,21,2,6,11};
+	//	int num[20];
+	//	for(int k = 0; k < 20; ++k) num[k] = 5*1.0*rand()/RAND_MAX;
 	int n = sizeof(num)/sizeof(int);
 	vector<int> arr1(num, num+n), arr2 = arr1, arr3 = arr1, arr4 = arr1;
 	cout << arr1 << endl;
@@ -30,13 +30,15 @@ void testQuickSort(int argc, char* argv[])
 
 	int num2[] = {13,19,9,5,12,8,7,4,21,2,6,11};
 	int n2 = sizeof(num2)/sizeof(int);
-	vector<int> arr5(num2, num2+n2);
 
-	int i = 8;
-	int v = qs1.select(arr5, i);
-	qs1.sort(arr5);
-	cout << arr5 << endl;
-	cout << "Order static " << 3 << " of array is " << v << endl;
+	SelectKth sol;
+	for(int i = 1; i <= n2; ++i) {
+		vector<int> arr5(num2, num2+n2), arr6(arr5);
+		int v1 = sol.RSelect(arr5, i);
+		int v2 = sol.DSelect(arr6, i);
+		if(v1 == v2) cout << "Order static " << i << " of array is " << v1 << endl;
+		else cout << "Error! Inconsistent order static " << i << " of array !" << endl;
+	}
 }
 
 void testBucketSort(int argc, char* argv[])
