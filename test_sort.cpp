@@ -3,6 +3,43 @@
 extern ostream& operator<<(ostream& os, const vector<double>& vec);
 extern ostream& operator<<(ostream& os, const vector<int>& vec);
 
+void testOrderStatistics(int argc, char* argv[])
+{
+	int num2[] = {13,19,9,5,12,8,7,4,21,2,6,11};
+	int n2 = sizeof(num2)/sizeof(int);
+
+	SelectKth sol;
+	for(int i = 1; i <= n2; ++i) {
+		vector<int> arr5(num2, num2+n2), arr6(arr5);
+		int v1 = sol.RSelect(arr5, i);
+		int v2 = sol.DSelect(arr6, i);
+		if(v1 == v2) cout << "Order static " << i << " of array is " << v1 << endl;
+		else cout << "Error! Inconsistent order static " << i << " of array !" << endl;
+	}
+
+	const int m = 0, n = 22;
+	int r = 300;
+	int seed = 20;
+	srand(seed);
+	vector<int> A(m, 0), B(n, 0), C(m+n, 0);
+	for(int i = 0; i < m; ++i) {
+		C[i] = A[i] = r*1.0*rand()/RAND_MAX;		
+	}
+	for(int i = 0; i < n; ++i) {
+		C[i+m] = B[i] = r*1.0*rand()/RAND_MAX;
+	}
+	sort(A.begin(), A.end());
+	sort(B.begin(), B.end());
+	sort(C.begin(), C.end());
+	cout << A << endl;
+	cout << B << endl;
+	cout << C << endl;
+	for(int i = 1; i <= m+n; ++i) {
+		int v = sol.Select(A, B, i);
+		cout << i << "-th order statistic of array is " << v << endl;
+	}
+}
+
 void testQuickSort(int argc, char* argv[])
 {
 	int seed = 23;
@@ -28,17 +65,6 @@ void testQuickSort(int argc, char* argv[])
 	qs4.sort(arr4);
 	cout << arr4 << endl;
 
-	int num2[] = {13,19,9,5,12,8,7,4,21,2,6,11};
-	int n2 = sizeof(num2)/sizeof(int);
-
-	SelectKth sol;
-	for(int i = 1; i <= n2; ++i) {
-		vector<int> arr5(num2, num2+n2), arr6(arr5);
-		int v1 = sol.RSelect(arr5, i);
-		int v2 = sol.DSelect(arr6, i);
-		if(v1 == v2) cout << "Order static " << i << " of array is " << v1 << endl;
-		else cout << "Error! Inconsistent order static " << i << " of array !" << endl;
-	}
 }
 
 void testBucketSort(int argc, char* argv[])
