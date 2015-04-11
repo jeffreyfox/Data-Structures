@@ -167,38 +167,8 @@ void RBTree::insert(RBTreeNode *z) {
 	if(y == null) root = z; //tree was empty, update root
 	else if(z->key < y->key) y->left = z;
 	else y->right = z;
-
-	z->color = 'r';
+	z->color = 'r'; //color it as red
 	insertFixUp(z);
-}
-
-void RBTree::remove(RBTreeNode *z) {
-	RBTreeNode *y = z, *x(null);
-	char yc = y->color;
-	if(z->left == null) { 
-		x = z->right;
-		transplant(z, z->right);
-	} else if(z->right == null) {
-		x = z->left;
-		transplant(z, z->left);
-	} else { //at this point z->left and z->right both exist
-		y = minimum(z->right);//find successor of z
-		yc = y->color;
-		x = y->right;//the node where y's blackness will be pushed into
-		if(y->parent != z) {
-			transplant(y, y->right);
-			y->right = z->right; //right part of z
-			y->right->parent = y; //also does for x is null case
-		} else {
-			x->parent = y; //for x is null case
-		}
-		transplant(z, y);
-		//left part of z
-		y->left = z->left;
-		y->left->parent = y; //z->left surely exist
-		y->color = z->color;
-	}
-	if(yc == 'b') removeFixUp(x);
 }
 
 void RBTree::insertFixUp(RBTreeNode *z) {
@@ -212,9 +182,7 @@ void RBTree::insertFixUp(RBTreeNode *z) {
 				z = z->parent->parent; //move x to x->p->p, continue loop
 			} else { 
 				//case 1.2, uncle is black, and z is inner child, rotate to 1.3
-				if(z == z->parent->right) {
-					z = z->parent; rotL(z);
-				}
+				if(z == z->parent->right) { z = z->parent; rotL(z); }
 				//case 1.3, uncle is black, and z is outer child, rotate z->p-> and recolor
 				z->parent->color = 'b';
 				z->parent->parent->color = 'r';
@@ -228,9 +196,7 @@ void RBTree::insertFixUp(RBTreeNode *z) {
 				z = z->parent->parent; //move x to x->p->p, continue loop
 			} else { 
 				//case 2.2, uncle is black, and z is inner child, rotate to 2.3
-				if(z == z->parent->left) {
-					z = z->parent; rotR(z);
-				}
+				if(z == z->parent->left) { z = z->parent; rotR(z);}
 				//case 2.3, uncle is black, and z is outer child, rotate z->p-> and recolor
 				z->parent->color = 'b';
 				z->parent->parent->color = 'r';
@@ -239,6 +205,33 @@ void RBTree::insertFixUp(RBTreeNode *z) {
 		}
 	}
 	root->color = 'b'; //set root to black
+}
+
+void RBTree::remove(RBTreeNode *z) {
+	char yc = z->color;
+	RBTreeNode *x;
+	if(z->left == null) {
+		x = z->right; transplant(z, x); //x's parent implicitly set
+	} else if(z->right == null) {
+		x = z->left; transplant(z, x); //x's parent implicitly set
+	} else {
+		RBTreeNode *y = minimum(z->right); //z's successor
+		yc = y->color; //save y's original color
+		x = y->right; //x can be null
+		if(y == z->right) {
+			x->parent = y; //x's parent explicity set (only effective when x is null)
+		} else {
+			transplant(y, x); //x's parent implicitly set
+			y->right = z->right;
+			y->right->parent = y;
+		}
+		transplant(z, y);
+		y->left = z->left;
+		y->left->parent = y;
+		y->color = z->color;
+	}
+
+	if(yc == 'b') removeFixUp(x);//only fix when y's original color is black
 }
 
 void RBTree::removeFixUp(RBTreeNode *x) {
@@ -257,7 +250,7 @@ void RBTree::removeFixUp(RBTreeNode *x) {
 					continue; //no need to proceed
 				}
 				//case 1.3: w's right child is black, then left child has to be red. rotate to go to 1.4
-				if(w->right->color == 'b') { //then left is red
+				if(w->left->color == 'r') { //then left is red
 					w->color = 'r'; w->left->color = 'b'; //color flip
 					rotR(w);
 					w = x->parent->right; //reset w to right node!
