@@ -115,7 +115,7 @@ public:
 		else insertUtil(root, z);
 	}
 
-	//remove a given snode z from the binary search tree
+	//remove a given node z from the binary search tree
 	void remove(BSTreeNode *z) {
 		if(z->left == NULL) transplant(z, z->right); //z has no left child
 		else if(z->right == NULL) transplant(z, z->left); // z has no right child
@@ -127,9 +127,21 @@ public:
 				z->right->parent = y;
 			} 
 			transplant(z, y);
-			y->left = z->left; z->left->parent = y;
+			y->left = z->left; z->left->parent = y; //neither z->left nor y are NULL
 		}
 		delete z;
+	}
+
+	//remove a given node z from the binary search tree (flipping)
+	void remove2(BSTreeNode *z) {
+		if(z->left == NULL) { transplant(z, z->right); delete z; }//z has no left child
+		else if(z->right == NULL) { transplant(z, z->left); delete z; } // z has no right child
+		else { //z has both children, find successor (minimum of z->right)
+			BSTreeNode *y = minimum(z->right); //by definition, y does not have left child
+			z->key = y->key; //replace z with y
+			transplant(y, y->right);
+			delete y;
+		}
 	}
 
 protected:
@@ -142,7 +154,7 @@ protected:
 	}
 
 	//Utility function for inserting z to tree rooted at u, update u when needed
-	void insertUtil(BSTreeNode *&u, BSTreeNode *z) { //u is not NULL
+	void insertUtil(BSTreeNode *u, BSTreeNode *z) { //u is not NULL
 		if(z->key < u->key) {
 			if(u->left != NULL) insertUtil(u->left, z);
 			else { u->left = z; z->parent = u; }
