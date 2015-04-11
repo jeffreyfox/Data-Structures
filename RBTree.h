@@ -238,19 +238,16 @@ void RBTree::removeFixUp(RBTreeNode *x) {
 	while(x != root && x->color == 'b') {
 		if(x == x->parent->left) { //case 1: x is a left child
 			RBTreeNode *w = x->parent->right; //w is x's sibling
-			if(w->color == 'r') { //case 1.1: sibling w is red, rotate+flip to make it black, continue
+			if(w->color == 'r') { //case 1.1: sibling w is red
 				x->parent->color = 'r'; w->color = 'b'; //color flip
 				rotL(x->parent);
 				w = x->parent->right; //reset w
-			} else { //cases 1.2-1.4: sibling w is black
-				//case 1.2: both w's children are black. push x's black to parent, continue loop
-				if(w->left->color == 'b' && w->right->color == 'b') {
-					w->color = 'r'; //compensate
-					x = x->parent;
-					continue; //no need to proceed
-				}
+			} else if(w->left->color == 'b' && w->right->color == 'b') { //case 1.2: w black, both children are black
+				w->color = 'r'; //compensate
+				x = x->parent;
+			} else { // case 1.3 1.4: at least one of w's children is red
 				//case 1.3: w's right child is black, then left child has to be red. rotate to go to 1.4
-				if(w->left->color == 'r') { //then left is red
+				if(w->right->color == 'b') { //then left is red
 					w->color = 'r'; w->left->color = 'b'; //color flip
 					rotR(w);
 					w = x->parent->right; //reset w to right node!
@@ -267,13 +264,11 @@ void RBTree::removeFixUp(RBTreeNode *x) {
 				x->parent->color = 'r'; w->color = 'b';
 				rotR(x->parent);
 				w = x->parent->right;
-			} else { //cases 2.2-2.4
-				if(w->left->color == 'b' && w->right->color == 'b') { //case 2.2
-					w->color = 'r';
-					x = x->parent;
-					continue;
-				}
-				if(w->left->color == 'b') { //case 2.3
+			} else if(w->left->color == 'b' && w->right->color == 'b') { //case 2.2
+				w->color = 'r';
+				x = x->parent;
+			} else {
+				if(w->left->color == 'b') { //case 2.3, go to 2.4
 					w->color = 'r'; w->right->color = 'b';
 					rotL(w);
 					w = x->parent->left;
