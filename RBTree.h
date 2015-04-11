@@ -42,16 +42,37 @@ public:
 
 	//print tree in-order (recursive)
 	void printInOrder() { printInOrderUtil(root); }
-	//utility function to recursively print all nodes in in-order
-	void printInOrderUtil(RBTreeNode *node); 
-
+	void printInOrderUtil(RBTreeNode *z) {
+		if(z == null) return;
+		printInOrderUtil(z->left);
+		printNode(z);
+		printInOrderUtil(z->right);
+	}
 	//print tree level-order
-	void printLevelOrder();
+	void printLevelOrder()
+	{
+		deque<RBTreeNode*> qt;
+		deque<int> ql;
+		int level = 0;
+		if(root != null) { qt.push_back(root); ql.push_back(level);}
+		while(!qt.empty()) {
+			RBTreeNode *n = qt.front(); qt.pop_front();
+			int l = ql.front(); ql.pop_front();
+			if(l > level) { cout << endl; level ++; }
+			printNode(n);
+			if(n->left != null) { qt.push_back(n->left); ql.push_back(l+1);}
+			if(n->right != null) { qt.push_back(n->right); ql.push_back(l+1);}
+		}
+		cout << endl;
+	}
 
-	//insert a node to binary search tree (iterative)
+	//insert a node to red-black tree
 	void insert(RBTreeNode *z);
+	//remove a node to red-black tree
 	void remove(RBTreeNode *z);
-	bool isValid() { return isValid(root); } 
+	//remove a node to red-black tree (node flipping)
+	void remove2(RBTreeNode *z);
+	//check if tree is valid
 
 private: 
 
@@ -64,8 +85,34 @@ private:
 	}
 
 	//left and right rotation of tree around z
-	void rotL(RBTreeNode *z);
-	void rotR(RBTreeNode *z);
+	void rotL(RBTreeNode *x) {
+		RBTreeNode *y = x->right;
+		//move y's left to x's right
+		x->right = y->left;
+		if(y->left != null) y->left->parent = x;
+		//fix pointers between x and x's parent (if exist)
+		y->parent = x->parent;
+		if(x->parent == null) root = y;
+		else if(x->parent->left == x) x->parent->left = y;
+		else x->parent->right = y;
+		//pointers betwen x and y
+		y->left = x;
+		x->parent = y;
+	}
+	void rotR(RBTreeNode *x) {
+		RBTreeNode *y = x->left;
+		//move y's right to x's left
+		x->left = y->right;
+		if(y->right != null) y->right->parent = x;
+		//fix pointers between x and x's parent (if exist)
+		y->parent = x->parent;
+		if(x->parent == null) root = y;
+		else if(x->parent->left == x) x->parent->left = y;
+		else x->parent->right = y;
+		//pointers betwen x and y
+		y->right = x;
+		x->parent = y;
+	}
 
 	//function to replace subtree rooted at u with subtree rooted at v
 	void transplant(RBTreeNode *u, RBTreeNode *v) {
@@ -75,86 +122,16 @@ private:
 		else u->parent->right = v; //u was a right child
 	}
 
-	void printNode(RBTreeNode *node);
+	void printNode(RBTreeNode *z) {
+		cout << z->key << ((z->color == 'r') ? "R " : " ");
+	}
+
 	void insertFixUp(RBTreeNode *z);
 	void removeFixUp(RBTreeNode *x);
-	bool isValid(RBTreeNode *h);
 
 	RBTreeNode* root; //root node
 	RBTreeNode* null; //sentinel node
 };
-
-void RBTree::printLevelOrder()
-{
-	deque<RBTreeNode*> qt;
-	deque<int> ql;
-	int level = 0;
-	if(root != null) { qt.push_back(root); ql.push_back(level);}
-	while(!qt.empty()) {
-		RBTreeNode *n = qt.front(); qt.pop_front();
-		int l = ql.front(); ql.pop_front();
-		if(l > level) { cout << endl; level ++; }
-		printNode(n);
-		if(n->left != null) { qt.push_back(n->left); ql.push_back(l+1);}
-		if(n->right != null) { qt.push_back(n->right); ql.push_back(l+1);}
-	}
-	cout << endl;
-}
-
-void RBTree::rotL(RBTreeNode *x) {
-	RBTreeNode *y = x->right;
-	//move y's left to x's right
-	x->right = y->left;
-	if(y->left != null) y->left->parent = x;
-	//fix pointers between x and x's parent (if exist)
-	y->parent = x->parent;
-	if(x->parent == null) root = y;
-	else if(x->parent->left == x) x->parent->left = y;
-	else x->parent->right = y;
-	//pointers betwen x and y
-	y->left = x;
-	x->parent = y;
-}
-
-void RBTree::rotR(RBTreeNode *x) {
-	RBTreeNode *y = x->left;
-	//move y's right to x's left
-	x->left = y->right;
-	if(y->right != null) y->right->parent = x;
-	//fix pointers between x and x's parent (if exist)
-	y->parent = x->parent;
-	if(x->parent == null) root = y;
-	else if(x->parent->left == x) x->parent->left = y;
-	else x->parent->right = y;
-	//pointers betwen x and y
-	y->right = x;
-	x->parent = y;
-}
-
-bool RBTree::isValid(RBTreeNode *h) {
-	if(h == null) {
-		if(h->color == 'r') cout <<"Invalid: null is red " <<endl;
-		return h->color == 'b';
-	}
-	if(h == root) {
-		if(h->color == 'r') { 
-			cout <<"Invalid: root is red " <<endl;
-			return false;
-		}
-	}
-	if(h->color == 'r') {
-		if(h->left->color == 'r' || h->right->color == 'r') {
-			cout <<"Invalid: double red " << endl;
-			return false;
-		}
-	}
-	if(h != root) {
-		if(h->parent->left != h && h->parent->right != h) {
-			cout <<"Invalid: inconsistent parent child pointers " << endl;
-		}
-	}
-	return isValid(h->left) && isValid(h->right);
-}
 
 void RBTree::insert(RBTreeNode *z) {
 	z->left = z->right = null;
@@ -230,7 +207,27 @@ void RBTree::remove(RBTreeNode *z) {
 		y->left->parent = y;
 		y->color = z->color;
 	}
+	delete z;
+	if(yc == 'b') removeFixUp(x);//only fix when y's original color is black
+}
 
+void RBTree::remove2(RBTreeNode *z) {
+	char yc = z->color;
+	RBTreeNode *x;
+	if(z->left == null) {
+		x = z->right; transplant(z, x); //x's parent implicitly set
+		delete z;
+	} else if(z->right == null) {
+		x = z->left; transplant(z, x); //x's parent implicitly set
+		delete z;
+	} else {
+		RBTreeNode *y = minimum(z->right); //z's successor
+		yc = y->color; //save y's original color
+		x = y->right; //x can be null
+		z->key = y->key; //color node value
+		transplant(y, x); //x's parent implicitly set
+		delete y;
+	}
 	if(yc == 'b') removeFixUp(x);//only fix when y's original color is black
 }
 
@@ -282,17 +279,6 @@ void RBTree::removeFixUp(RBTreeNode *x) {
 		}
 	}
 	x->color = 'b';
-}
-
-void RBTree::printNode(RBTreeNode *z) {
-	cout << z->key << ((z->color == 'r') ? "R " : " ");
-}
-
-void RBTree::printInOrderUtil(RBTreeNode *z) {
-	if(z == null) return;
-	printInOrderUtil(z->left);
-	printNode(z);
-	printInOrderUtil(z->right);
 }
 
 #endif
