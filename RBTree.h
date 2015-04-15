@@ -3,9 +3,10 @@
 
 struct RBTreeNode {
 	int key;
+	int size; //size attribute for order statistics
 	char color; //color field for red-black tree
 	RBTreeNode *left, *right, *parent;
-	RBTreeNode(int v) : key(v), color('b'), left(NULL), right(NULL), parent(NULL) {} //default black
+	RBTreeNode(int v) : key(v), size(0), color('b'), left(NULL), right(NULL), parent(NULL) {} //default black
 };
 
 class RBTree {
@@ -15,6 +16,9 @@ public:
 
 	//check if tree is empty
 	bool empty() const { return root == null;}
+	//return size of the tree
+	int size() const { return root->size;}
+	const RBTreeNode* rootnode() const { return root;}
 	//return the null node
 	const RBTreeNode* nullnode() const { return null;}
 
@@ -38,6 +42,14 @@ public:
 		if(z == null) return z;
 		while(z->right != null) z = z->right;
 		return z;
+	}
+
+	//output all keys between a and b in subtree z (z has to be an existing node)
+	void enumerate(const RBTreeNode *z, int a, int b) const {
+		if(z == null) return;
+		enumerate(z->left, a, b);
+		if(a <= z->key && z->key <= b) cout << z->key << " ";
+		enumerate(z->right, a, b);
 	}
 
 	//print tree in-order (recursive)
@@ -64,6 +76,50 @@ public:
 			if(n->right != null) { qt.push_back(n->right); ql.push_back(l+1);}
 		}
 		cout << endl;
+	}
+
+	//select the node corresponding to i-th order statistic (iterative)
+	RBTreeNode* select(int i) {
+		if(i <= 0 || i > root->size) return null;
+		RBTreeNode *z = root;
+		while(1) {
+			int r = z->left->size + 1;
+			if(i == r) return z;
+			else if(i < r) { z = z->left;}
+			else { z = z->right; i -= r;}
+		}
+		return null; //not found
+	}
+
+	//select the node corresponding to i-th order statistic (recursive)
+	RBTreeNode* select2(int i) {
+		if(i <= 0 || i > root->size) return null;
+		else return selectUtil(root, i);
+	}
+	RBTreeNode* selectUtil(RBTreeNode* z, int i) {
+		int r = z->left->size + 1;
+		if(i == r) return z;
+		else if(i < r) return selectUtil(z->left, i);
+		else return selectUtil(z->right, i-r);
+	}
+
+	//return the rank of a given node (iterative)
+	int rank(RBTreeNode* z) {
+		int r = z->left->size + 1;
+		RBTreeNode *x = z;
+		while(x != root) {
+			if(x->parent->right == x) r += x->parent->left->size + 1;
+			x = x->parent;
+		}
+		return r;
+	}
+	//return the rank of a given node (recursive)
+	int rank2(RBTreeNode* z) { return rankUtil(root, z); }
+	//return rank of node z in substree x;
+	int rankUtil(RBTreeNode* x, RBTreeNode* z) {
+		if(x == z) return x->left->size+1;
+		else if(z->key < x->key) return rankUtil(x->left, z);
+		else return x->left->size + 1 + rankUtil(x->right, z);
 	}
 
 	//insert a node to red-black tree
@@ -98,6 +154,9 @@ private:
 		//pointers betwen x and y
 		y->left = x;
 		x->parent = y;
+		//update size attribute
+		y->size = x->size;
+		x->size = x->left->size + x->right->size + 1;
 	}
 	void rotR(RBTreeNode *x) {
 		RBTreeNode *y = x->left;
@@ -112,6 +171,9 @@ private:
 		//pointers betwen x and y
 		y->right = x;
 		x->parent = y;
+		//update size attribute
+		y->size = x->size;
+		x->size = x->left->size + x->right->size + 1;
 	}
 
 	//function to replace subtree rooted at u with subtree rooted at v
@@ -122,8 +184,16 @@ private:
 		else u->parent->right = v; //u was a right child
 	}
 
-	void printNode(RBTreeNode *z) {
-		cout << z->key << ((z->color == 'r') ? "R " : " ");
+	//traverse upwards and decreaase the size of nodes encountered by 1
+	void decSizeUp(RBTreeNode *z) {
+		while(z != null) {
+			z->size--;
+			z = z->parent;
+		}
+	}
+
+	void printNode(const RBTreeNode *z) const {
+		cout << z->key << ((z->color == 'r') ? "R-" : "-") << z->size << " ";
 	}
 
 	void insertFixUp(RBTreeNode *z);
@@ -135,8 +205,10 @@ private:
 
 void RBTree::insert(RBTreeNode *z) {
 	z->left = z->right = null;
+	z->size = 1; //initialize size attribute
 	RBTreeNode *x = root, *y = null;
 	while(x != null) {
+		x->size ++; //increment size attribute
 		y = x;
 		x = (z->key < x->key) ? x->left : x->right;
 	}
@@ -206,8 +278,10 @@ void RBTree::remove(RBTreeNode *z) {
 		y->left = z->left;
 		y->left->parent = y;
 		y->color = z->color;
+		y->size = z->size; //copy z's size attribute
 	}
 	delete z;
+	decSizeUp(x->parent); //update size attributes
 	if(yc == 'b') removeFixUp(x);//only fix when y's original color is black
 }
 
@@ -228,6 +302,7 @@ void RBTree::remove2(RBTreeNode *z) {
 		transplant(y, x); //x's parent implicitly set
 		delete y;
 	}
+	decSizeUp(x->parent); //update size attributes
 	if(yc == 'b') removeFixUp(x);//only fix when y's original color is black
 }
 
