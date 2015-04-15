@@ -1,5 +1,6 @@
 #include "BSTree.h"
 #include "RBTree.h"
+#include "IntervalTree.h"
 
 extern ostream& operator<<(ostream& os, const vector<double>& vec);
 extern ostream& operator<<(ostream& os, const vector<int>& vec);
@@ -132,6 +133,46 @@ void testBST(int argc, char* argv[])
 	cout << endl;
 }
 
+void testIntervalTree(int argc, char* argv[])
+{
+	int i = 0, N = 20, m = 50, seed = 800;
+	IntervalTree tree;
+
+	srand(seed);
+	for(i = 0; i < 1000000; ++i) rand();
+	for(i = 0; i < N; ++i) { 
+		int r1 = m*(1.0*rand()/RAND_MAX); 
+		int r2 = m*(1.0*rand()/RAND_MAX);
+		int start = min(r1, r2), end = max(r1, r2);
+		if(tree.search(start) == tree.nullnode()) {
+			cout << "(" << start << "-" << end << ") ";
+			tree.insert(new IntervalTreeNode(Interval(start, end)));
+		}
+	}
+	cout << endl;
+
+	cout << "Binary search tree in-order : " << endl;
+	tree.printInOrder(); cout << endl;
+	cout << "Binary search tree level-order : " << endl;
+	tree.printLevelOrder();
+	cout << endl;
+
+	cout << "Removing keys between " << m/4 << " and " << m*3/4 << " ... " << endl;
+	for(int k = m/4; k <= m*3/4; k++) {
+		IntervalTreeNode *t = tree.search(k);
+		if(t != tree.nullnode()) { 
+			cout << "("<<t->interval.start << "-" << t->interval.end << ", " << t->max << ") ";
+			tree.remove(t);
+		}
+	}
+	cout << endl;
+	cout << "Binary search tree in-order : " << endl;
+	tree.printInOrder(); cout << endl;
+	cout << "Binary search tree level-order : " << endl;
+	tree.printLevelOrder();
+	cout << endl;
+}
+
 void testRBT(int argc, char* argv[])
 {
 	int i = 0, N = 30, seed = 3;
@@ -211,5 +252,4 @@ void testRBT(int argc, char* argv[])
 	c2 = countIntChords2(num);
 	cout << "Number of intersecting chord pairs (brute force) = " << c1 << endl;
 	cout << "Number of intersecting chord pairs (RB     tree) = " << c2 << endl;
-
 }
