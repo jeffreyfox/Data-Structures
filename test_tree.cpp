@@ -20,6 +20,31 @@ void randPerm(vector<int>& num)
 	}
 }
 
+//brute-force way of counting inversion, O(n2)
+int countInversion1(const vector<int>& num)
+{
+	int n = num.size(), r = 0;
+	for(int i = 0; i < n; ++i) {
+		for(int j = i+1; j < n; ++j) {
+			if(num[i] > num[j]) r++;
+		}
+	}
+	return r;
+}
+
+//Red-black tree implementation of counting inversion, O(nlgn)
+int countInversion2(const vector<int>& num)
+{
+	int n = num.size(), r = 0;
+	RBTree rbt;
+	for(int i = 0; i < n; ++i) {
+		RBTreeNode *t = new RBTreeNode(num[i]);
+		rbt.insert(t);
+		r += rbt.size() - rbt.rank(t);
+	}
+	return r;
+}
+
 void testBST(int argc, char* argv[])
 {
 	int i = 0, N = 30, m = 100, seed = 800;
@@ -68,7 +93,7 @@ void testBST(int argc, char* argv[])
 
 void testRBT(int argc, char* argv[])
 {
-	int i = 0, N = 20, seed = 20;
+	int i = 0, N = 13, seed = 2;
 	RBTree rbt;
 	vector<int> num(N);
 	if(seed != 0) { //initialize randomly
@@ -133,4 +158,11 @@ void testRBT(int argc, char* argv[])
 	cout << "Red-black tree level-order : " << endl;
 	rbt.printLevelOrder();
 	cout << endl;
+
+	//count inversion
+	int c1, c2;
+	c1 = countInversion1(num);
+	c2 = countInversion2(num);
+	cout << "Number of inversion (brute force) = " << c1 << endl;
+	cout << "Number of inversion (RB     tree) = " << c2 << endl;
 }
