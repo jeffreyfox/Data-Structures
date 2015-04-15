@@ -45,6 +45,47 @@ int countInversion2(const vector<int>& num)
 	return r;
 }
 
+//Brute-force method of counting pairs of intersecting chords on a circle, O(n2)
+//chords values are permutations of 1 .. 2N. num[0, 1] gives the first chord
+int countIntChords1(const vector<int>& chords) 
+{
+	int n = chords.size()/2; //number of chords
+	int c = 0;
+	for(int i = 0; i < n; i++) {//chord #i
+		for(int j = i+1; j < n; j++) { //chord #j
+			int s1 = min(chords[2*i], chords[2*i+1]), e1 = max(chords[2*i], chords[2*i+1]);
+			int s2 = min(chords[2*j], chords[2*j+1]), e2 = max(chords[2*j], chords[2*j+1]);
+			if( (s1 < s2 && s2 < e1 && e1 < e2) || (s2 < s1 && s1 < e2 && e2 < e1) ) c++;
+		}
+	}
+	return c;
+}
+
+//Brute-force method of counting pairs of intersecting chords on a circle, O(n2)
+int countIntChords2(const vector<int>& chords)
+{
+	int np = chords.size(); //number of points
+	int nc = chords.size()/2; //number of chords
+	int c = 0;
+	vector<int> mapping(np+1, 0);
+	for(int i = 0; i < np; i += 2) {
+		mapping[chords[i]] = chords[i+1];
+		mapping[chords[i+1]] = chords[i];
+	}
+
+	RBTree rbt;
+	for(int i = 1; i <= np; i++) {//point #i
+		if(mapping[i] > i) { //starting point of a chord 
+			rbt.insert(new RBTreeNode(i));
+		} else { //ending point of a chord
+			RBTreeNode *t = rbt.search(mapping[i]);
+			c += rbt.size() - rbt.rank(t);
+			rbt.remove(t);
+		}
+	}
+	return c;
+}
+
 void testBST(int argc, char* argv[])
 {
 	int i = 0, N = 30, m = 100, seed = 800;
@@ -93,7 +134,7 @@ void testBST(int argc, char* argv[])
 
 void testRBT(int argc, char* argv[])
 {
-	int i = 0, N = 13, seed = 2;
+	int i = 0, N = 30, seed = 3;
 	RBTree rbt;
 	vector<int> num(N);
 	if(seed != 0) { //initialize randomly
@@ -165,4 +206,10 @@ void testRBT(int argc, char* argv[])
 	c2 = countInversion2(num);
 	cout << "Number of inversion (brute force) = " << c1 << endl;
 	cout << "Number of inversion (RB     tree) = " << c2 << endl;
+
+	c1 = countIntChords1(num);
+	c2 = countIntChords2(num);
+	cout << "Number of intersecting chord pairs (brute force) = " << c1 << endl;
+	cout << "Number of intersecting chord pairs (RB     tree) = " << c2 << endl;
+
 }
