@@ -11,17 +11,22 @@
 using namespace std;
 
 struct Interval {
-	int start, end;
-	Interval(int s, int e) : start(s), end(e) {}
+	int low, high;
+	Interval(int s, int e) : low(s), high(e) {}
 };
 
 struct IntervalTreeNode {
 	Interval interval;
 	int max; //maximum ending position of subtree rooted at this node
 	IntervalTreeNode *left, *right, *parent;
-	IntervalTreeNode(Interval i) : interval(i), max(i.end), left(NULL), right(NULL), parent(NULL) {}
-	int key() { return interval.start;}
+	IntervalTreeNode(Interval i) : interval(i), max(i.high), left(NULL), right(NULL), parent(NULL) {}
+	int key() { return interval.low;}
 };
+
+bool isOverlap(const Interval& i1, const Interval& i2)
+{
+	return(i1.low <= i2.high && i2.low <= i2.high);
+}
 
 //binary search tree
 class IntervalTree {
@@ -36,12 +41,40 @@ public:
 
 	//find the node with given key value (iterative)
 	IntervalTreeNode* search(int key) {
-		IntervalTreeNode *node = root;
-		while(node != NULL && key != node->key()) {
-			if(key < node->key()) node = node->left;
-			else node = node->right;
+		IntervalTreeNode *x = root;
+		while(x != NULL && key != x->key()) {
+			if(key < x->key()) x = x->left;
+			else x = x->right;
 		}
-		return node; //return when node == NULL (not found), or key matches (found)
+		return x; //return when x == NULL (not found), or key matches (found)
+	}
+
+	//find the overlapping node
+	IntervalTreeNode* searchOverlap(Interval i) {
+		IntervalTreeNode *x = root;
+		while(x != NULL) {
+			if(isOverlap(x->interval, i)) return x;
+			else if (x->left != NULL && x->left->max >= i.low) x = x->left;
+			else x = x->right;
+		}
+		return x;
+	}
+
+	//find the overlapping node with minimum starting point
+	IntervalTreeNode* searchMinLowOverlap(Interval i) {
+		return(root, i);
+	}
+	IntervalTreeNode* searchMinLowOverlapUtil(IntervalTreeNode* z, Interval i) {
+		if(z == NULL) return NULL;
+
+		IntervalTreeNode *x = NULL;
+		if(z->left != NULL && x->left->max >= i.low) {
+			x = searchMinLowOverlapUtil(z->left, i); //search left
+			if(x != NULL) return x;
+			else if(isOverlap(z->interval, i)) return z;
+			else return NULL; //not found in left subtree, should not in right subtree either
+		} else if(isOverlap(z->interval, i)) return z; 
+		else return searchMinLowOverlapUtil(z->right, i);
 	}
 
 	//find minimum and maximum element of tree rooted at z
@@ -80,7 +113,7 @@ public:
 	//traverse upwards and decreaase the size of nodes encountered by 1
 	void fixMaxUp(IntervalTreeNode *z) {
 		while(z != NULL) {
-			z->max = z->interval.end;
+			z->max = z->interval.high;
 			if(z->left != NULL) z->max = max(z->max, z->left->max);
 			if(z->right != NULL) z->max = max(z->max, z->right->max);
 			z = z->parent;
@@ -145,7 +178,7 @@ protected:
 		y->left = x;
 		x->parent = y;
 		y->max = x->max;
-		x->max = max(max(x->left->max, x->right->max), x->interval.end);
+		x->max = max(max(x->left->max, x->right->max), x->interval.high);
 	}
 	void rotR(IntervalTreeNode *x) {
 		IntervalTreeNode *y = x->left;
@@ -158,7 +191,7 @@ protected:
 		y->right = x;
 		x->parent = y;
 		y->max = x->max;
-		x->max = max(max(x->left->max, x->right->max), x->interval.end);
+		x->max = max(max(x->left->max, x->right->max), x->interval.high);
 	}
 
 	//function to replace subtree rooted at u with subtree rooted at v
@@ -178,7 +211,7 @@ protected:
 	}
 
 	void printNode(IntervalTreeNode *z) { 
-		cout << "(" << z->interval.start << "-" << z->interval.end << ", " << z->max << ") ";
+		cout << "(" << z->interval.low << "-" << z->interval.high << ", " << z->max << ") ";
 	}
 
 	IntervalTreeNode* root; //root node
