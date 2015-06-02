@@ -1,28 +1,20 @@
 import java.util.LinkedList;
 
 // class to find strongly connected components of a directed graph
-public class SCC {
+// Follows algorithm in Sedgewick's book.
+public class KosarajuSCC {
 
 	public static void main(String[] args) {
 		In in = new In(args[0]);
 		Digraph g = new Digraph(in);
-		SCC scc = new SCC(g);
-		int M = scc.count();
+		KosarajuSCC sccfinder = new KosarajuSCC(g);
+		int M = sccfinder.count();
 		StdOut.println(M + " components");
 
-		LinkedList<Integer>[] components;
-		components = (LinkedList<Integer>[]) new LinkedList[M];
-		for (int m = 0; m < M; ++m)
-			components[m] = new LinkedList<Integer>();
-
-		for (int v = 0; v < g.V(); ++v) {
-			int id = scc.id(v);
-			components[id].add(v);
-		}
 		//print all components
 		for (int m = 0; m < M; ++m) {
 			StdOut.print("Component " + m + ": ");
-			for (int v : components[m])
+			for (int v : sccfinder.scc(m))
 				StdOut.print(v + " ");
 			StdOut.println();
 		}
@@ -31,9 +23,10 @@ public class SCC {
 	private boolean[] marked; //whether site is visited?
 	private int[] id; //component identifier of the vertex
 	private int count; //number of strong components
+	LinkedList<Integer>[] scc; //strong components
 
 	// preprocessing constructor
-	public SCC(Digraph G) {
+	public KosarajuSCC(Digraph G) {
 		marked = new boolean[G.V()];
 		id = new int[G.V()];
 
@@ -45,6 +38,13 @@ public class SCC {
 				count ++;
 			}
 		}        
+		//construct strong components
+		scc = (LinkedList<Integer>[]) new LinkedList[count];
+		for (int i = 0; i < count; ++i)
+			scc[i] = new LinkedList<Integer>();
+
+		for (int v = 0; v < G.V(); ++v)
+			scc[id[v]].add(v);
 	}
 
 	//depth-first search at vertex v
@@ -57,6 +57,9 @@ public class SCC {
 			} 
 		}
 	}
+
+	// return component i
+	public Iterable<Integer> scc(int i) { return scc[i]; }
 
 	//are v and w strongly connected?
 	public boolean stronglyConnected(int v, int w) {
