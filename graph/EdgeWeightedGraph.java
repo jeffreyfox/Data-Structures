@@ -45,6 +45,16 @@ public class EdgeWeightedGraph {
 
 	// vertices adjacent to v
 	public Iterable<Edge> adj(int v) { return adj[v];}
+
+	// return all edges
+	public Iterable<Edge> edges() {
+		LinkedList<Edge> edges = new LinkedList<Edge>();
+		for (int v = 0; v < V; ++v) 
+			for (Edge e : adj[v]) 
+				if (e.other(v) > v) edges.add(e);
+		return edges;
+	}
+
 	//string representation
 	public String toString() {
 		String s = V + " vertices, " + E + " edges\n";
