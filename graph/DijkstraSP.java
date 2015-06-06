@@ -45,6 +45,7 @@ public class DijkstraSP {
 		for (DirectedEdge e : G.adj(v)) {
 			int w = e.to();
 			if (distTo[w] > distTo[v] + e.weight()) {
+				// can't happen for vertices popped out from pq (already in the tree)
 				distTo[w] = distTo[v] + e.weight();
 				edgeTo[w] = e;
 				pq.changeKey(w, distTo[w]); //update pq
