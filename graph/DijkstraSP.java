@@ -11,7 +11,7 @@ public class DijkstraSP {
 		DijkstraSP sp = new DijkstraSP(G, s);
 
 		for (int v = 0; v < G.V(); ++v) {
-			StdOut.printf("s to %d (%4.2f): ", v, sp.distTo(v));
+			StdOut.printf("%d to %d (%4.2f): ", s, v, sp.distTo(v));
 			if (sp.hasPathTo(v)) {
 				for (DirectedEdge e : sp.pathTo(v))
 					StdOut.print(e + " ");				
