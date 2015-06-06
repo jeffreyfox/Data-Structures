@@ -47,6 +47,29 @@ public class Topological {
 		order.push(v);
 	}
 
+	// preprocessing constructor
+	public Topological(EdgeWeightedDigraph G) {
+		marked = new boolean[G.V()];
+		order = new Stack<Integer>();
+		for (int v = 0; v < G.V(); ++v) {
+			if (!marked[v])
+				dfs(G, v);
+		}        
+	}
+
+	//depth-first search at vertex v
+	private void dfs(EdgeWeightedDigraph G, int v) {
+		marked[v] = true;
+		for (DirectedEdge e : G.adj(v)) {
+			int w = e.to();
+			if (!marked[w]) {				
+				dfs(G, w);
+			} 
+		}
+		//finished with v, add to stack
+		order.push(v);
+	}
+
 	public boolean isDAG() { return isDAG; }
 	// vertices in topological order
 	public Iterable<Integer> order() { return order; }
