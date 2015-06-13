@@ -1,0 +1,1 @@
+LSD string sort: suitable for fix length strings, need to examine all digits. If R is large (Unicode), overhead increases significantly. If alphabet set is not numbers, we could find a mapping from each alphabet to its index (e.g. A=>0, C=>1, G=>2, T=>3)
