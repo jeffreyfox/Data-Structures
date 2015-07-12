@@ -1,0 +1,83 @@
+/// KMP pattern search algorithm
+public class StringSearchKMP {
+    // using dfa[][] array and X[]
+    public static int search(String txt, String pat) {
+        int n = txt.length(), m = pat.length();
+        int i, j;
+        int R = 256;
+        int[][] dfa = new int[R][m]; // dfa[c][j]: index position in pattern to jump to after comparing a 'c' with pat[j]
+        int[] X = new int[m]; //X[j]: the final pattern index position when running pat[1..j] as txt on dfa corresponding to pat
+
+        //how to constrcut dfa[c][j], in other words, how to find jump position when comparing a 'c' with pat[j]?
+        //we know that at this stage, the first j character in txt is exactly pat[0..j-1]
+        //if the next character also matches, i.e. c == pat[j], then increment j, thus dfa[pat.charAt(j)][j] = j+1
+        //otherwise, we have to shift pattern to right and start comparing pat with txt, which is exactly pat[1..j-1]. This is same as
+        //running pat[1..j-1] on dfa. After we know the final position, indicated as X, we then compare c with pat[X], thus 
+        //dfa[c][j] = dfa[c][pat.charAt[X]], which is calculated earlier (DP).
+
+        //If we store the final position of pat[1..j] for all 0<=j<m before hand (as X[j]), we don't need to explicitly simulate that.
+        //X[j] can be calculated in a DP fasion:
+        //to run pat[1..j], we first run pat[1..j-1] on dfa, and obtain the final position in pattern as X[j-1] (by the definition of X[j]),
+        //and next we should compare pat[j] (as txt char) with pat[X[j-1]] (as pat char), thus X[j] = dfa[pat.charAt(j)]][X[j-1]].
+        //We start from 1, once we construct the dfa[c][j], we can calculate X[j]
+
+        //construct dfa
+        dfa[pat.charAt(0)][0] = 1;
+        for (j = 1; j < m; ++j) { //start from j = 1 (2-char prefix)
+            //if not match, then comparing c with pat[j] is same as comparing c with pat[X[j-1]]
+            for (int c = 0; c < R; ++c)
+                dfa[c][j] = dfa[c][X[j-1]];
+            dfa[pat.charAt(j)][j] = j+1;
+
+            X[j] = dfa[pat.charAt(j)][X[j-1]];
+        }
+
+        //running txt on dfa
+        for (i = 0, j = 0; i < n && j < m; ++i)
+            j = dfa[txt.charAt(i)][j];
+
+        if (j == m) return i-m; //found
+        else        return   n; //not found
+    }
+    // simplified version, since we only need X of the previous step, just use one variable X instead of an array, and update X accordingly
+    public static int search2(String txt, String pat) {
+        int n = txt.length(), m = pat.length();
+        int i, j;
+        int R = 256;
+        int[][] dfa = new int[R][m]; 
+        int X = 0; //initally for j = 0
+
+        //construct dfa
+        dfa[pat.charAt(0)][0] = 1;
+        for (j = 1; j < m; ++j) { //start from j = 1 (2-char prefix)
+            //if not match, then comparing c with pat[j] is same as comparing c with pat[X[j-1]]
+            for (int c = 0; c < R; ++c)
+                dfa[c][j] = dfa[c][X]; //use X for j-1 to construct dfa[c][j]
+            dfa[pat.charAt(j)][j] = j+1;
+
+            X = dfa[pat.charAt(j)][X]; //update X for j from X for j-1
+        }
+
+        //running txt on dfa
+        for (i = 0, j = 0; i < n && j < m; ++i)
+            j = dfa[txt.charAt(i)][j];
+
+        if (j == m) return i-m; //found
+        else        return   n; //not found
+    }
+
+    public static void main(String[] args) {
+        String txt = args[0];
+        String pat = args[1];
+        int offset = StringSearchKMP.search(txt, pat);
+        int offset2 = StringSearchKMP.search2(txt, pat);
+        if (offset != offset2) System.out.println("Warning: offset2 and offset are not equal!");
+        if (offset == txt.length()) System.out.println("Pattern \"" + pat + "\" not found in \"" + txt + "\"!");
+        else {
+            System.out.println("Pattern \"" + pat + "\" found in \"" + txt + "\".");
+            System.out.println(txt);
+            for (int i = 0; i < offset; ++i) System.out.print(" ");
+            System.out.println(pat);
+        }
+    }
+}
