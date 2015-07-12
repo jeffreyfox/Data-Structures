@@ -10,20 +10,20 @@ public class NFA {
         pat = pattern;
         int m = pattern.length();
         G = new Digraph(m+1); //contains m+1 states, last is accepted state
-        LinkedList<Integer> stack = new LinkedList<Integer>();
+        LinkedList<Integer> op_lp = new LinkedList<Integer>(); //stack for '(' positions
+        LinkedList<Integer> op_or = new LinkedList<Integer>(); //stack for '|' positions
         for (int i = 0; i < m; ++i) { //scan pattern
             char c = pat.charAt(i);
-            int lp = i; 
-            if (c == '(' || c == '|') stack.addFirst(i);
+            int lp = i, or = i;
+            if      (c == '(') op_lp.addFirst(i);
+            else if (c == '|') op_or.addFirst(i);
             else if (c == ')') {
-                int j = stack.removeFirst();
-                if (pat.charAt(j) == '|') {  // j : '|' index
-                    lp = stack.removeFirst(); // lp '(' index
-                    G.addEdge(lp, j+1); 
-                    G.addEdge(j, i);
-                } else {  // j : '(' index
-                    lp = j; // lp '(' index
-                }
+                lp = op_lp.removeFirst(); //pop matching '('
+                while (!op_or.isEmpty() && op_or.peek() > lp) { // found a '|' between '(' and ')' 
+                    or = op_or.removeFirst();
+                    G.addEdge(lp, or+1); 
+                    G.addEdge(or, i);
+                } 
             }
             if (i < m-1 && pat.charAt(i+1) == '*') { // look ahead
                 G.addEdge(lp, i+1);  //lp is the index of last '('
@@ -74,9 +74,6 @@ public class NFA {
         boolean tag = nfa.recognizes(txt); 
         System.out.println("Text    = " + txt);
         System.out.println("Pattern = " + pat);
-        System.out.print  ("          ");
-        for (int i = 0; i < pat.length(); ++i) System.out.print(i);
-        System.out.println();
         if (tag) System.out.println("Text matches pattern.");
         else System.out.println("Text does NOT match pattern!");
     }
