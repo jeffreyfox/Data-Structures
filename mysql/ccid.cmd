@@ -5,7 +5,7 @@ CREATE TABLE ccid
   unitid INT,                                      # unique id 
   chronname VARCHAR(255),                          # Institution name
   city VARCHAR(32),                                # Institution city
-  state VARCHAR(16),                               # Institution state
+  state VARCHAR(20),                               # Institution state
   level VARCHAR(8),                                # Level of institution (4-year, 2-year)
   control VARCHAR(128),                            # Control of institution (Public, Private not-for-profit, Private for-profit)
   long_x DOUBLE(9, 6),                             # Institution longitude
@@ -13,7 +13,7 @@ CREATE TABLE ccid
   site VARCHAR(255),                               # Institution Web site address
   student_count INT,                               # Total number of undergraduates in 2010
   basic VARCHAR(255),                              # Carnegie Foundation for the Advancement of Teaching Basic Classification (2010 version)
-  flagship VARCHAR(4) DEFAULT NULL,                # Denotes Public flagship institutions
+  flagship CHAR(1) DEFAULT 'N',                      # Denotes Public flagship institutions
   awards_per_value DOUBLE(3, 1) DEFAULT NULL,      # Completions per 100 FTE undergraduate students (average 2011, 2012, and 2013)
   ft_pct DOUBLE(3, 1) DEFAULT NULL,                # Percentage of undergraduates who attend full-time
   fte_value INT DEFAULT NULL,                      # total number of full-time equivalent undergraduates
@@ -24,10 +24,9 @@ CREATE TABLE ccid
   PRIMARY KEY (unitid)
 );
 
-
-
 LOAD DATA INFILE 'cc_institution_details.csv' INTO TABLE ccid 
 FIELDS TERMINATED BY ',' 
+OPTIONALLY ENCLOSED BY '"'   # optional double quotes
 LINES TERMINATED BY '\r'  # The raw csv file ends with a '^M'
 IGNORE 1 LINES   # ignore header
 (unitid, chronname, city, state, level, control, 
@@ -38,6 +37,12 @@ student_count, awards_per_value, @dummy, @dummy, @dummy, @dummy,
 @dummy, @dummy, @dummy, @dummy, @dummy, retain_value,
 @dummy, @dummy, @dummy, @dummy, @vsa_grad_after4_first, @dummy,
 @dummy, @dummy, @vsa_grad_after6_first, @dummy, @dummy, @dummy )
-SET flagship = IF(@flagship = 'NULL', NULL, @flagship),
+SET flagship = IF(@flagship = 'X', 'Y', 'N'),
 vsa_grad_after4_first = IF(@vsa_grad_after4_first = 'NULL', NULL, @vsa_grad_after4_first),
 vsa_grad_after6_first = IF(@vsa_grad_after6_first = 'NULL', NULL, @vsa_grad_after6_first);
+
+#ccid4y contains only 4-year colleges, and excludes private for-profit colleges
+DROP TABLE ccid4y;
+CREATE TABLE ccid4y
+SELECT * from ccid
+WHERE level='4-year' AND control != 'Private for-profit' 
