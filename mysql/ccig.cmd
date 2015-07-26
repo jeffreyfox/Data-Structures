@@ -1,7 +1,7 @@
 #
-DROP TABLE grads;
+DROP TABLE ccig;
 
-CREATE TABLE grads
+CREATE TABLE ccig
 (
   unitid INT,
   year INT,
@@ -15,10 +15,10 @@ CREATE TABLE grads
   grad_150_rate DOUBLE(3, 1)
 );
 
-LOAD DATA INFILE 'cc_institution_grads.csv' INTO TABLE grads
+LOAD DATA INFILE 'cc_institution_grads.csv' INTO TABLE ccig
 FIELDS TERMINATED BY ',' 
 LINES TERMINATED BY '\n'  
 IGNORE 1 LINES;   # ignore header
 
 
-# select unitid, grad_100_rate, grad_150_rate from grads where year=2013 AND gender='B' AND race='A';
+# select unitid, grad_100_rate, grad_150_rate from ccig where year=2013 AND gender='B' AND race='A';
