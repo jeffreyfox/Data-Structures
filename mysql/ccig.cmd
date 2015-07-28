@@ -25,8 +25,24 @@ grad_150 = IF(@grad_150 = 'NULL', NULL, @grad_150),
 grad_100_rate = IF(@grad_100_rate = 'NULL', NULL, @grad_100_rate),
 grad_150_rate = IF(@grad_150_rate = 'NULL', NULL, @grad_150_rate);
 
-DROP TABLE ccig4y;
-CREATE TABLE ccig4y
+# graduation rate for all races ('X')
+CREATE TABLE tmp1
+(SELECT unitid, grad_100_rate AS 'grad_100_rate', grad_150_rate AS 'grad_150_rate'
+FROM ccig 
+WHERE year=2013 AND gender='B' AND race='X' AND cohort='4y bach');
+
+# graduation rate for asians ('A')
+CREATE TABLE tmp2
 (SELECT unitid, grad_100_rate AS 'asian_grad_100_rate', grad_150_rate AS 'asian_grad_150_rate'
 FROM ccig 
 WHERE year=2013 AND gender='B' AND race='A' AND cohort='4y bach');
+
+# combine two tables
+DROP TABLE ccig4y;
+CREATE TABLE ccig4y  # combined table
+SELECT tmp1.*, tmp2.asian_grad_100_rate, tmp2.asian_grad_150_rate
+FROM tmp1 LEFT JOIN tmp2
+ON tmp1.unitid=tmp2.unitid;
+
+DROP TABLE tmp1;
+DROP TABLE tmp2;
