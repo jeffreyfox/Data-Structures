@@ -1,0 +1,2 @@
+ createMySQLcmd.sh  Institution_Characteristics_II.csv InstCharII
+ createMySQLcmd.sh  Student_Charges.csv StudChrg

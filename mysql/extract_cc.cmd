@@ -1,3 +1,4 @@
+# combined file of the 4
 # ccid is table of 'college completion details'
 DROP TABLE ccid;
 CREATE TABLE ccid
