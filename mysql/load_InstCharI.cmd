@@ -1,5 +1,4 @@
 #
-DROP TABLE InstCharI;
 CREATE TABLE InstCharI
 (
   UNITID INT,
@@ -33,7 +32,3 @@ MEDICAL,
 CCBASIC, CCIPUG, CCIPGRAD, CCUGPROF, CCENRPRF, CCSIZSET, CARNEGIE, @dum,
 INSTSIZE);
 
-#SET grad_100 = IF(@grad_100 = 'NULL', NULL, @grad_100),
-#grad_150 = IF(@grad_150 = 'NULL', NULL, @grad_150),
-#grad_100_rate = IF(@grad_100_rate = 'NULL', NULL, @grad_100_rate),
-#grad_150_rate = IF(@grad_150_rate = 'NULL', NULL, @grad_150_rate);
