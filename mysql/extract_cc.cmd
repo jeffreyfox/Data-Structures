@@ -41,8 +41,68 @@ SET flagship = IF(@flagship = 'X', 'Y', 'N'),
 vsa_grad_after4_first = IF(@vsa_grad_after4_first = 'NULL', NULL, @vsa_grad_after4_first),
 vsa_grad_after6_first = IF(@vsa_grad_after6_first = 'NULL', NULL, @vsa_grad_after6_first);
 
+
 #ccid4y contains only 4-year colleges, and excludes private for-profit colleges
 DROP TABLE ccid4y;
 CREATE TABLE ccid4y
 SELECT * from ccid
 WHERE level='4-year' AND control != 'Private for-profit' 
+
+DROP TABLE ccig;
+CREATE TABLE ccig
+(
+  unitid INT,
+  year INT,
+  gender CHAR(1), 
+  race VARCHAR(2),
+  cohort VARCHAR(16),
+  grad_cohort VARCHAR(4),
+  grad_100 INT DEFAULT NULL,
+  grad_150 INT DEFAULT NULL,
+  grad_100_rate DOUBLE(3, 1) DEFAULT NULL,
+  grad_150_rate DOUBLE(3, 1) DEFAULT NULL
+);
+
+LOAD DATA INFILE 'cc_institution_grads.csv' INTO TABLE ccig
+FIELDS TERMINATED BY ',' 
+LINES TERMINATED BY '\n'  
+IGNORE 1 LINES   # ignore header
+(unitid, year, gender, race, cohort, grad_cohort, @grad_100, @grad_150, @grad_100_rate, @grad_150_rate) 
+SET grad_100 = IF(@grad_100 = 'NULL', NULL, @grad_100),
+grad_150 = IF(@grad_150 = 'NULL', NULL, @grad_150),
+grad_100_rate = IF(@grad_100_rate = 'NULL', NULL, @grad_100_rate),
+grad_150_rate = IF(@grad_150_rate = 'NULL', NULL, @grad_150_rate);
+
+# graduation rate for all races ('X')
+CREATE TABLE tmp1
+(SELECT unitid, grad_100_rate AS 'grad_100_rate', grad_150_rate AS 'grad_150_rate'
+FROM ccig 
+WHERE year=2013 AND gender='B' AND race='X' AND cohort='4y bach');
+
+# graduation rate for asians ('A')
+CREATE TABLE tmp2
+(SELECT unitid, grad_100_rate AS 'asian_grad_100_rate', grad_150_rate AS 'asian_grad_150_rate'
+FROM ccig 
+WHERE year=2013 AND gender='B' AND race='A' AND cohort='4y bach');
+
+# combine two tables
+DROP TABLE ccig4y;
+CREATE TABLE ccig4y  # combined table
+SELECT tmp1.*, tmp2.asian_grad_100_rate, tmp2.asian_grad_150_rate
+FROM tmp1 LEFT JOIN tmp2
+ON tmp1.unitid=tmp2.unitid;
+
+DROP TABLE tmp1;
+DROP TABLE tmp2;
+DROP TABLE ccic4y;
+CREATE TABLE ccic4y  # combined table
+SELECT ccid4y.*, ccig4y.asian_grad_100_rate, ccig4y.asian_grad_150_rate 
+FROM ccid4y LEFT JOIN ccig4y
+ON ccid4y.unitid=ccig4y.unitid;
+SELECT 'unitid', 'chronname', 'city', 'state', 'level', 'control', 'long_x', 'lat_y', 'site', 'student_count', 'basic', 'flagship', 'awards_per_value', 'ft_pct', 'fte_value', 'med_sat_value', 'retain_value', 'vsa_grad_after4_first', 'vsa_grad_after6_first', 'asian_grad_100_rate', 'asian_grad_150_rate'
+UNION
+SELECT *
+FROM ccic4y
+INTO OUTFILE 'cc_institution_refined.csv'
+FIELDS ENCLOSED BY '"' TERMINATED BY ',' ESCAPED BY ""  # escaped by set as empty to change \N to NULL for null output
+LINES TERMINATED BY '\n';
