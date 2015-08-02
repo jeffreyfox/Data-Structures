@@ -86,7 +86,7 @@ CREATE TABLE tmp2
 FROM ccig 
 WHERE year=2013 AND gender='B' AND race='A' AND cohort='4y bach');
 
-# combine two tables
+# combine two tables into ccig4y
 DROP TABLE ccig4y;
 CREATE TABLE ccig4y  # combined table
 SELECT tmp1.*, tmp2.asian_grad_100_rate, tmp2.asian_grad_150_rate
@@ -95,15 +95,3 @@ ON tmp1.unitid=tmp2.unitid;
 
 DROP TABLE tmp1;
 DROP TABLE tmp2;
-DROP TABLE ccic4y;
-CREATE TABLE ccic4y  # combined table
-SELECT ccid4y.*, ccig4y.asian_grad_100_rate, ccig4y.asian_grad_150_rate 
-FROM ccid4y LEFT JOIN ccig4y
-ON ccid4y.unitid=ccig4y.unitid;
-SELECT 'unitid', 'chronname', 'city', 'state', 'level', 'control', 'long_x', 'lat_y', 'site', 'student_count', 'basic', 'flagship', 'awards_per_value', 'ft_pct', 'fte_value', 'med_sat_value', 'retain_value', 'vsa_grad_after4_first', 'vsa_grad_after6_first', 'asian_grad_100_rate', 'asian_grad_150_rate'
-UNION
-SELECT *
-FROM ccic4y
-INTO OUTFILE 'cc_institution_refined.csv'
-FIELDS ENCLOSED BY '"' TERMINATED BY ',' ESCAPED BY ""  # escaped by set as empty to change \N to NULL for null output
-LINES TERMINATED BY '\n';
