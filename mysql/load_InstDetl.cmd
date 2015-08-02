@@ -1,11 +1,8 @@
-# ccid is table of 'college completion details'
-DROP TABLE ccid;
-CREATE TABLE ccid
+# InstDetl is table of 'college completion details'
+CREATE TABLE InstDetl
 (
   unitid INT,                                      # unique id 
   chronname VARCHAR(255),                          # Institution name
-  city VARCHAR(32),                                # Institution city
-  state VARCHAR(20),                               # Institution state
   level VARCHAR(8),                                # Level of institution (4-year, 2-year)
   control VARCHAR(128),                            # Control of institution (Public, Private not-for-profit, Private for-profit)
   long_x DOUBLE(9, 6),                             # Institution longitude
@@ -24,12 +21,12 @@ CREATE TABLE ccid
   PRIMARY KEY (unitid)
 );
 
-LOAD DATA INFILE 'cc_institution_details.csv' INTO TABLE ccid 
+LOAD DATA INFILE 'cc_institution_details.csv' INTO TABLE InstDetl 
 FIELDS TERMINATED BY ',' 
 OPTIONALLY ENCLOSED BY '"'   # optional double quotes
 LINES TERMINATED BY '\r'  # The raw csv file ends with a '^M'
 IGNORE 1 LINES   # ignore header
-(unitid, chronname, city, state, level, control, 
+(unitid, chronname, @dum, @dum, level, control, 
 basic, @dummy, @flagship, long_x, lat_y, site, 
 student_count, awards_per_value, @dummy, @dummy, @dummy, @dummy, 
 @dummy, @dummy, ft_pct, fte_value, @dummy, med_sat_value,
@@ -41,8 +38,7 @@ SET flagship = IF(@flagship = 'X', 'Y', 'N'),
 vsa_grad_after4_first = IF(@vsa_grad_after4_first = 'NULL', NULL, @vsa_grad_after4_first),
 vsa_grad_after6_first = IF(@vsa_grad_after6_first = 'NULL', NULL, @vsa_grad_after6_first);
 
-#ccid4y contains only 4-year colleges, and excludes private for-profit colleges
-DROP TABLE ccid4y;
-CREATE TABLE ccid4y
-SELECT * from ccid
+#InstDetl4y contains only 4-year colleges, and excludes private for-profit colleges
+CREATE TABLE InstDetl4y
+SELECT * from InstDetl
 WHERE level='4-year' AND control != 'Private for-profit' 

@@ -1,7 +1,6 @@
 #
-DROP TABLE ccig;
 
-CREATE TABLE ccig
+CREATE TABLE InstGrad
 (
   unitid INT,
   year INT,
@@ -15,7 +14,7 @@ CREATE TABLE ccig
   grad_150_rate DOUBLE(3, 1) DEFAULT NULL
 );
 
-LOAD DATA INFILE 'cc_institution_grads.csv' INTO TABLE ccig
+LOAD DATA INFILE 'cc_institution_grads.csv' INTO TABLE InstGrad
 FIELDS TERMINATED BY ',' 
 LINES TERMINATED BY '\n'  
 IGNORE 1 LINES   # ignore header
@@ -28,18 +27,17 @@ grad_150_rate = IF(@grad_150_rate = 'NULL', NULL, @grad_150_rate);
 # graduation rate for all races ('X')
 CREATE TABLE tmp1
 (SELECT unitid, grad_100_rate AS 'grad_100_rate', grad_150_rate AS 'grad_150_rate'
-FROM ccig 
+FROM InstGrad 
 WHERE year=2013 AND gender='B' AND race='X' AND cohort='4y bach');
 
 # graduation rate for asians ('A')
 CREATE TABLE tmp2
 (SELECT unitid, grad_100_rate AS 'asian_grad_100_rate', grad_150_rate AS 'asian_grad_150_rate'
-FROM ccig 
+FROM InstGrad 
 WHERE year=2013 AND gender='B' AND race='A' AND cohort='4y bach');
 
 # combine two tables
-DROP TABLE ccig4y;
-CREATE TABLE ccig4y  # combined table
+CREATE TABLE InstGrad4y  # combined table
 SELECT tmp1.*, tmp2.asian_grad_100_rate, tmp2.asian_grad_150_rate
 FROM tmp1 LEFT JOIN tmp2
 ON tmp1.unitid=tmp2.unitid;
