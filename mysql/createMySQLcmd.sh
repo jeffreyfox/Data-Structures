@@ -16,7 +16,7 @@ fi
 
 echo "Creating SQL loading commands csv file: $csv"
 
-columns=`head -1 $csv | sed 's/,/ INT, /g' | sed -e 's/\r/ INT/'`
+columns=`head -1 $csv | sed 's/,/ INT, \n/g' | sed -e 's/\r/ INT/'`
 
 cmd=load_${table}.cmd
 
