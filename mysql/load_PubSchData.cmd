@@ -45,5 +45,5 @@ LOAD DATA INFILE 'Public_School_Data.csv' INTO TABLE PubSchData FIELDS TERMINATE
 
 DROP TABLE PubSchDataRef;
 CREATE TABLE PubSchDataRef
-SELECT CDSCode, NCESDist, NCESSchool, County, District, School FROM PubSchData WHERE County IN ('Alameda', 'Santa Clara', 'San mateo', 'San Francisco') AND StatusType='Active' AND (SOCType LIKE 'K-12 Schools%' OR SOCType LIKE 'High Schools%');
+SELECT CDSCode, County, District, School, City, Zip FROM PubSchData WHERE County IN ('Santa Cruz', 'Alameda', 'Santa Clara', 'San mateo', 'San Francisco') AND StatusType='Active' AND (SOCType LIKE 'K-12 Schools%' OR SOCType LIKE 'High Schools%');
 

@@ -1,8 +1,4 @@
-DROP TABLE tmp1;
-DROP TABLE tmp2;
-DROP TABLE tmp3;
-DROP TABLE tmp4;
-DROP TABLE tmp5;
+DROP TABLES tmp1, tmp2, tmp3, tmp4, tmp5, CombinedAll;
 
 # combine PubSchDataRef and SAT
 CREATE TABLE tmp1  # combined table
@@ -53,7 +49,7 @@ FROM tmp3 LEFT JOIN API
 ON tmp3.CDSCode=API.CDS);
 
 # combine tmp4 and EnroRef
-CREATE TABLE CombinedAll  # combined table
+CREATE TABLE tmp5  # combined table
 (SELECT tmp4.*, 
 EnroRef.ETOT_asian, 
 EnroRef.ETOT_all, 
@@ -61,4 +57,23 @@ EnroRef.asian_pct
 FROM tmp4 LEFT JOIN EnroRef
 ON tmp4.CDSCode=EnroRef.CDS_CODE);
 
-DROP TABLES tmp1, tmp2, tmp3, tmp4;
+# combine tmp5 and RequRef
+CREATE TABLE CombinedAll  # combined table
+(SELECT tmp5.*, 
+RequRef.UC_GRADS_asian, RequRef.GRADS_asian, RequRef.UC_CSU_pct_asian, 
+RequRef.UC_GRADS_all, RequRef.GRADS_all, RequRef.UC_CSU_pct_all
+FROM tmp5 LEFT JOIN RequRef
+ON tmp5.CDSCode=RequRef.CDS_CODE);
+
+DROP TABLES tmp1, tmp2, tmp3, tmp4, tmp5;
+
+DROP TABLE CombinedRef;
+
+CREATE TABLE CombinedRef
+(SELECT 
+CDSCode, County, District, School, City, Zip, API_charter, 
+API_avg_nw, API_aa_avg_nw, API_as_avg_nw, API_hi_avg_nw, API_wh_avg_nw, API_el_avg_nw,
+ETOT_asian, ETOT_all, asian_pct,
+UC_GRADS_asian, GRADS_asian, UC_CSU_pct_asian, 
+UC_GRADS_all, GRADS_all, UC_CSU_pct_all
+FROM CombinedAll);
