@@ -3,6 +3,8 @@ CREATE TABLE InstDetl
 (
   unitid INT,                                      # unique id 
   chronname VARCHAR(255),                          # Institution name
+  city VARCHAR(20),
+  state CHAR(2),
   level VARCHAR(8),                                # Level of institution (4-year, 2-year)
   control VARCHAR(128),                            # Control of institution (Public, Private not-for-profit, Private for-profit)
   long_x DOUBLE(9, 6),                             # Institution longitude

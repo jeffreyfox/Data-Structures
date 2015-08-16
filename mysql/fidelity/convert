@@ -1,0 +1,8 @@
+ls Trade* | grep -v txt > tmp
+
+while read a
+do
+  short=${a/TradeConfirmation/}
+  pdftotext -layout $a $short.txt
+done < tmp
+rm -rf tmp
